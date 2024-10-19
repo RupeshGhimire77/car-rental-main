@@ -186,6 +186,11 @@ class UserProvider extends ChangeNotifier {
     if (getLoginUserStatus != StatusUtil.loading) {
       setGetLoginUserStatus(StatusUtil.loading);
     }
+
+    // Clear previous user data
+    UserData.userData = null; // Clear previous user data
+    isUserExist = false; // Reset user existence status
+
     User1 user = User1(
       email: emailTextField.text,
       password: passwordTextField.text,

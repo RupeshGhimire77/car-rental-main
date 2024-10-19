@@ -236,7 +236,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 300),
+                  padding: const EdgeInsets.only(top: 230),
                   child: CustomButton(
                       onPressed: () {
                         logoutShowDialog(context, userProvider);

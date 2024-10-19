@@ -166,6 +166,13 @@ class _LoginState extends State<Login> {
                             await Helper.displaySnackBar(
                                 context, loginSuccessStr);
                             await userProvider.storeValueToSharedPreference();
+
+                            //fetching updated role from sharedPreference
+                            final SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            role = prefs.getString("role");
+
+                            //redirect based on the role of the user
                             if (role == "user") {
                               Navigator.pushAndRemoveUntil(
                                   context,

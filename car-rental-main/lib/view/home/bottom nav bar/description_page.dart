@@ -401,16 +401,22 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      CustomBookTextfield(
-                                        controller: _startDateController,
-                                        hintText: "Start Date",
-                                        suffixIcon: IconButton(
-                                          onPressed: () async {
-                                            await _selectStartDate(context);
-                                          },
-                                          icon: Icon(
-                                            Icons.calendar_month,
-                                            color: Color(0xff7B776D),
+                                      GestureDetector(
+                                        onTap: () async =>
+                                            await _selectStartDate(context),
+                                        child: AbsorbPointer(
+                                          child: CustomBookTextfield(
+                                            controller: _startDateController,
+                                            hintText: "Start Date",
+                                            suffixIcon: IconButton(
+                                              onPressed: () async {
+                                                await _selectStartDate(context);
+                                              },
+                                              icon: Icon(
+                                                Icons.calendar_month,
+                                                color: Color(0xff7B776D),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -429,16 +435,22 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      CustomBookTextfield(
-                                        controller: _endDateController,
-                                        hintText: "End Date",
-                                        suffixIcon: IconButton(
-                                          onPressed: () async {
-                                            await _selectEndDate(context);
-                                          },
-                                          icon: Icon(
-                                            Icons.calendar_month,
-                                            color: Color(0xff7B776D),
+                                      GestureDetector(
+                                        onTap: () async =>
+                                            await _selectEndDate(context),
+                                        child: AbsorbPointer(
+                                          child: CustomBookTextfield(
+                                            controller: _endDateController,
+                                            hintText: "End Date",
+                                            suffixIcon: IconButton(
+                                              onPressed: () async {
+                                                await _selectEndDate(context);
+                                              },
+                                              icon: Icon(
+                                                Icons.calendar_month,
+                                                color: Color(0xff7B776D),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -463,19 +475,23 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      CustomBookTextfield(
-                                        // controller:
-                                        //     _pickUpTimeController, // Link the controller
-                                        controller: bookCarProvider
-                                            .pickUpTimeController,
-                                        suffixIcon: IconButton(
-                                          onPressed: () async {
-                                            await _selectPickUpTime(
-                                                context); // Call pick up time function
-                                          },
-                                          icon: Icon(
-                                            Icons.watch_later_outlined,
-                                            color: Color(0xff7B776D),
+                                      GestureDetector(
+                                        onTap: () async =>
+                                            await _selectPickUpTime(context),
+                                        child: AbsorbPointer(
+                                          child: CustomBookTextfield(
+                                            controller: bookCarProvider
+                                                .pickUpTimeController,
+                                            suffixIcon: IconButton(
+                                              onPressed: () async {
+                                                await _selectPickUpTime(
+                                                    context); // Call pick up time function
+                                              },
+                                              icon: Icon(
+                                                Icons.watch_later_outlined,
+                                                color: Color(0xff7B776D),
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -494,19 +510,26 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      CustomBookTextfield(
-                                        controller:
-                                            bookCarProvider.dropTimeController,
-                                        // controller:
-                                        //     _dropTimeController, // Link the controller
-                                        suffixIcon: IconButton(
-                                          onPressed: () async {
-                                            await _selectDropTime(
-                                                context); // Call drop time function
-                                          },
-                                          icon: Icon(
-                                            Icons.watch_later_outlined,
-                                            color: Color(0xff7B776D),
+                                      GestureDetector(
+                                        onTap: () async =>
+                                            await _selectDropTime(context),
+                                        child: AbsorbPointer(
+                                          child: CustomBookTextfield(
+                                            controller: bookCarProvider
+                                                .dropTimeController,
+                                            // controller:
+                                            //     _dropTimeController, // Link the controller
+                                            suffixIcon:
+                                                // IconButton(
+                                                //   onPressed: () async {
+                                                //     await _selectDropTime(
+                                                //         context); // Call drop time function
+                                                //   },icon:
+                                                Icon(
+                                              Icons.watch_later_outlined,
+                                              color: Color(0xff7B776D),
+                                            ),
+                                            // ),
                                           ),
                                         ),
                                       ),
@@ -568,7 +591,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: Text(
-                                "Please select your driving License after clicking on Book Now.",
+                                "Please select your driving License before booking.",
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),

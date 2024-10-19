@@ -250,23 +250,22 @@ class _HomePageState extends State<HomePage> {
                                       children: List.generate(
                                         carProvider.carList.length,
                                         (index) {
-                                          return GestureDetector(
-                                            onTap: () async {
-                                              await carProvider.getCarDetails();
-                                              if (!mounted) return;
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
+                                          return SizedBox(
+                                            height: 300,
+                                            width: 300,
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                // await carProvider.getCarDetails();
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
                                                       builder: (context) =>
                                                           DescriptionPage(
-                                                            car: carProvider
-                                                                .carList[index],
-                                                          ),
-                                                      maintainState: false));
-                                            },
-                                            child: SizedBox(
-                                              height: 300,
-                                              width: 300,
+                                                        car: carProvider
+                                                            .carList[index],
+                                                      ),
+                                                    ));
+                                              },
                                               child: Card(
                                                 child: Column(
                                                   crossAxisAlignment:
