@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
+import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
@@ -47,6 +48,9 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider(
           create: (context) => BrandProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => BookCarProvider(),
         )
       ],
       child: MaterialApp(
