@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/model/user.dart';
+import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
 import 'package:flutter_application_1/shared/custom_textform.dart';

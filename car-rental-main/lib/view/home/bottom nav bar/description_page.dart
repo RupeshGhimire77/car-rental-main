@@ -305,7 +305,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              "Rental Price: ${carProvider.rentalPrice ?? ""}",
+                              "Rental Price: Rs. ${carProvider.rentalPrice ?? ""}/day",
                               style:
                                   TextStyle(color: Colors.yellow, fontSize: 30),
                             ),
@@ -379,13 +379,24 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                   FocusNode focusNode,
                                   VoidCallback onFieldSubmitted) {
                                 return CustomLocationTextfield(
-                                  hintText: "Destination Location",
+                                  // enabled: false,
+                                  hintText: "Banepa, Godamchwok",
                                   controller: textEditingController,
                                   focusNode: focusNode,
+                                  readOnly: true,
                                 );
                               },
                             ),
-
+                            Center(
+                              child: Text(
+                                "You can't change the destination location.",
+                                style: TextStyle(
+                                    color: Colors.orangeAccent, fontSize: 12),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -459,7 +470,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                 ),
                               ],
                             ),
-
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -538,56 +548,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                 ),
                               ],
                             ),
-
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            //   children: [
-                            //     Expanded(
-                            //       child: Column(
-                            //         crossAxisAlignment: CrossAxisAlignment.start,
-                            //         children: [
-                            //           Text(
-                            //             "Pick up Time",
-                            //             style: TextStyle(
-                            //                 color: Color(0xffC3BEB6),
-                            //                 fontSize: 16),
-                            //           ),
-                            //           CustomBookTextfield(
-                            //             // hintText: "Start Date",
-                            //             suffixIcon: IconButton(
-                            //                 onPressed: () {},
-                            //                 icon: Icon(
-                            //                   Icons.watch_later_outlined,
-                            //                   color: Color(0xff7B776D),
-                            //                 )),
-                            //           ),
-                            //         ],
-                            //       ),
-                            //     ),
-                            //     Expanded(
-                            //       child: Column(
-                            //         crossAxisAlignment: CrossAxisAlignment.start,
-                            //         children: [
-                            //           Text(
-                            //             "Drop Time",
-                            //             style: TextStyle(
-                            //                 color: Color(0xffC3BEB6),
-                            //                 fontSize: 16),
-                            //           ),
-                            //           CustomBookTextfield(
-                            //             // hintText: "End Date",
-                            //             suffixIcon: IconButton(
-                            //                 onPressed: () {},
-                            //                 icon: Icon(
-                            //                   Icons.watch_later_outlined,
-                            //                   color: Color(0xff7B776D),
-                            //                 )),
-                            //           ),
-                            //         ],
-                            //       ),
-                            //     )
-                            //   ],
-                            // ),
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: Text(
@@ -595,7 +555,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
-
                             Row(
                               children: [
                                 Center(
@@ -660,7 +619,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                   ),
                               ],
                             ),
-
                             CustomBookButton(
                                 onPressed: () {
                                   if (bookCarProvider.pickUpPointController.text.isEmpty ||
@@ -779,52 +737,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
       });
     }
   }
-
-  // Future<void> _selectStartDate(BuildContext context) async {
-  //   NepaliDateTime? pickedDate = await showMaterialDatePicker(
-  //     context: context,
-  //     initialDate: _selectedStartDate!,
-  //     firstDate:
-  //         NepaliDateTime.now(), // Start from the real-time day (current date)
-  //     lastDate: NepaliDateTime(
-  //       NepaliDateTime.now().year,
-  //       NepaliDateTime.now().month +
-  //           1, // Limit to 1 month after the current date
-  //       NepaliDateTime.now().day,
-  //     ),
-  //   );
-
-  //   if (pickedDate != null) {
-  //     setState(() {
-  //       _selectedStartDate = pickedDate;
-  //       _startDateController.text = _formatNepaliDate(pickedDate);
-
-  //       // Reset end date and update text field
-  //       _selectedEndDate = null;
-  //       _endDateController.clear();
-  //     });
-  //   }
-  // }
-
-  // Future<void> _selectEndDate(BuildContext context) async {
-  //   NepaliDateTime? pickedDate = await showMaterialDatePicker(
-  //     context: context,
-  //     initialDate: _selectedEndDate ?? _selectedStartDate!,
-  //     firstDate: _selectedStartDate!, // End date must be after start date
-  //     lastDate: NepaliDateTime(
-  //       _selectedStartDate!.year,
-  //       _selectedStartDate!.month + 1, // Add one month to start date
-  //       _selectedStartDate!.day,
-  //     ),
-  //   );
-
-  //   if (pickedDate != null) {
-  //     setState(() {
-  //       _selectedEndDate = pickedDate;
-  //       _endDateController.text = _formatNepaliDate(pickedDate);
-  //     });
-  //   }
-  // }
 
   String _formatNepaliDate(NepaliDateTime date) {
     return NepaliDateFormat('yyyy-MM-dd').format(date);
@@ -960,8 +872,15 @@ class CustomLocationTextfield extends StatelessWidget {
   final String? hintText;
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final bool? enabled;
+  bool readOnly;
 
-  CustomLocationTextfield({this.hintText, this.controller, this.focusNode});
+  CustomLocationTextfield(
+      {this.hintText,
+      this.controller,
+      this.focusNode,
+      this.enabled,
+      this.readOnly = false});
 
   @override
   Widget build(BuildContext context) {
@@ -971,6 +890,8 @@ class CustomLocationTextfield extends StatelessWidget {
         style: TextStyle(color: Color(0xff7B776D)),
         controller: controller,
         focusNode: focusNode,
+        readOnly: readOnly,
+        enabled: enabled,
         decoration: InputDecoration(
           hintText: hintText,
           suffixIcon: Icon(Icons.location_on),

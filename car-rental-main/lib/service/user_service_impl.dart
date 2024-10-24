@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/core/api_response.dart';
-import 'package:flutter_application_1/model/user.dart';
+import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/service/user_service.dart';
 import 'package:flutter_application_1/utils/helper.dart';
 import 'package:flutter_application_1/utils/status_util.dart';

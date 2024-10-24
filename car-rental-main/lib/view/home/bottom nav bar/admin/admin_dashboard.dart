@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/brand.dart';
 import 'package:flutter_application_1/model/car.dart';
-import 'package:flutter_application_1/model/user.dart';
+import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
@@ -314,7 +314,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                   child: loader == true
                       ? CircularProgressIndicator()
                       : Text(
-                          "Upload Image",
+                          "Upload Car Image",
                           style: TextStyle(color: Colors.white, fontSize: 20),
                         )),
               if (downloadUrl != null)
@@ -649,7 +649,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                         child: loader == true
                             ? CircularProgressIndicator()
                             : Text(
-                                "Upload Image",
+                                "Upload Brand Image",
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 20),
                               )),
@@ -663,6 +663,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                       ),
                     CustomTextFormField(
                       // initialValue: carProvider.model,
+                      keyboardType: TextInputType.name,
                       labelText: "Enter " + brandStr,
                       onChanged: (p0) {
                         brandProvider.setBrandName(p0);

@@ -15,9 +15,11 @@ class CustomBookTextfield extends StatelessWidget {
   final Color? fillColor;
   final void Function(String)? onChanged;
   final List<TextInputFormatter>? inputFormatters;
+  bool? enabled;
 
   CustomBookTextfield({
     Key? key,
+    this.enabled,
     this.initialValue,
     this.hintText,
     this.controller,
@@ -42,6 +44,7 @@ class CustomBookTextfield extends StatelessWidget {
         height: 35,
         child: TextFormField(
           style: TextStyle(color: Color(0xff7B776D)),
+          enabled: enabled,
           initialValue: initialValue,
           controller: controller,
           obscureText: obscureText,

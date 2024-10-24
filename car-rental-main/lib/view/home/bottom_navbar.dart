@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/history.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/home_page.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/brands_sort.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/user_profile.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -11,7 +12,11 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  List<Widget> widgetList = [HomePage(), History(), UserProfile()];
+  List<Widget> widgetList = [
+    HomePage(),
+    History(),
+    UserProfile(),
+  ];
   int selectIndex = 0;
 
   @override
