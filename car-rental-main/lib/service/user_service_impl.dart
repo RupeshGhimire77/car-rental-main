@@ -54,27 +54,6 @@ class UserServiceImpl extends UserService {
     }
   }
 
-  // @override
-  // Future<ApiResponse> getIndividualUser(User user) async {
-  //   bool userData = false;
-  //   if (await Helper.isInternetConnectionAvailable()) {
-  //     try {
-  //       await FirebaseFirestore.instance
-  //           .collection("RentIt")
-  //           .where("id", isEqualTo: user.id)
-  //           .get()
-  //           .then((value) {
-  //         if (value.docs.isNotEmpty) {
-  //           userData = true;
-  //         }
-  //       });
-  //       return ApiResponse(statusUtil: StatusUtil.success,data: userData);
-  //     } catch (e) {
-  //       return ApiResponse(statusUtil: StatusUtil.error, data: e.toString());
-  //     }
-  //   }
-  // }
-
   @override
   Future<ApiResponse> checkUserData(User1 user) async {
     // bool isUserExists = false;

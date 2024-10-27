@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
+import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/shared/custom_book_textfield.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
@@ -25,6 +26,8 @@ class DescriptionPage extends StatefulWidget {
 
 class _DescriptionPageState extends State<DescriptionPage> {
   @override
+  TextEditingController emailController = TextEditingController();
+
   void initState() {
     if (widget.car != null) {
       var provider = Provider.of<CarProvider>(context, listen: false);
@@ -70,6 +73,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
       setState(() {
         name = prefs.getString("name");
         email = prefs.getString("email");
+        emailController.text = email ?? "";
         role = prefs.getString("role");
       });
     });
@@ -324,10 +328,30 @@ class _DescriptionPageState extends State<DescriptionPage> {
                     width: MediaQuery.of(context).size.width * .9,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10, left: 15),
-                      child: Consumer<BookCarProvider>(
-                        builder: (context, bookCarProvider, child) => Column(
+                      child: Consumer2<BookCarProvider, UserProvider>(
+                        builder:
+                            (context, bookCarProvider, userProvider, child) =>
+                                Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Visibility(
+                              visible: false,
+                              child: CustomBookTextfield(
+                                // labelText: "user email: ${email}",
+                                // initialValue: email ?? "",
+                                controller: emailController,
+                                // bookCarProvider.setCarId("${email}"),
+                              ),
+                            ),
+                            Visibility(
+                              visible: false,
+                              child: CustomBookTextfield(
+                                labelText: "Car Id",
+                                initialValue: widget.car!.id,
+                                controller: bookCarProvider
+                                    .setCarId("${widget.car!.id}"),
+                              ),
+                            ),
                             Text("Pick up Point",
                                 style: TextStyle(
                                     color: Color(0xffC3BEB6), fontSize: 16)),
@@ -360,33 +384,41 @@ class _DescriptionPageState extends State<DescriptionPage> {
                             Text("Destination Point",
                                 style: TextStyle(
                                     color: Color(0xffC3BEB6), fontSize: 16)),
-                            Autocomplete<String>(
-                              optionsBuilder:
-                                  (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return const Iterable<String>.empty();
-                                }
-                                return allPlaces.where((place) => place
-                                    .toLowerCase()
-                                    .contains(
-                                        textEditingValue.text.toLowerCase()));
-                              },
-                              onSelected: (String selection) {
-                                bookCarProvider.setDestinationPoint(selection);
-                              },
-                              fieldViewBuilder: (BuildContext context,
-                                  TextEditingController textEditingController,
-                                  FocusNode focusNode,
-                                  VoidCallback onFieldSubmitted) {
-                                return CustomLocationTextfield(
-                                  // enabled: false,
+                            TextFormField(
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                  hintStyle:
+                                      TextStyle(color: Color(0xff7B776D)),
                                   hintText: "Banepa, Godamchwok",
-                                  controller: textEditingController,
-                                  focusNode: focusNode,
-                                  readOnly: true,
-                                );
-                              },
+                                  suffixIcon: Icon(Icons.location_on)),
                             ),
+                            // Autocomplete<String>(
+                            //   optionsBuilder:
+                            //       (TextEditingValue textEditingValue) {
+                            //     if (textEditingValue.text.isEmpty) {
+                            //       return const Iterable<String>.empty();
+                            //     }
+                            //     return allPlaces.where((place) => place
+                            //         .toLowerCase()
+                            //         .contains(
+                            //             textEditingValue.text.toLowerCase()));
+                            //   },
+                            //   onSelected: (String selection) {
+                            //     bookCarProvider.setDestinationPoint(selection);
+                            //   },
+                            //   fieldViewBuilder: (BuildContext context,
+                            //       TextEditingController textEditingController,
+                            //       FocusNode focusNode,
+                            //       VoidCallback onFieldSubmitted) {
+                            //     return CustomLocationTextfield(
+                            //       // enabled: false,
+                            //       hintText: "Banepa, Godamchwok",
+                            //       controller: textEditingController,
+                            //       focusNode: focusNode,
+                            //       readOnly: true,
+                            //     );
+                            //   },
+                            // ),
                             Center(
                               child: Text(
                                 "You can't change the destination location.",
@@ -621,9 +653,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
                             ),
                             CustomBookButton(
                                 onPressed: () {
-                                  if (bookCarProvider.pickUpPointController.text.isEmpty ||
-                                      bookCarProvider.destinationPointController
-                                          .text.isEmpty ||
+                                  if (bookCarProvider
+                                          .pickUpPointController.text.isEmpty ||
                                       bookCarProvider
                                           .startDateController.text.isEmpty ||
                                       bookCarProvider
@@ -648,24 +679,28 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                   bookCarProvider.setDropTime(
                                       bookCarProvider.dropTimeController.text);
 
-                                  print(
-                                      "Pick Up Time: ${_pickUpTimeController.text}");
-                                  print(
-                                      "Drop Time: ${_dropTimeController.text}");
+                                  bookCarProvider
+                                      .setEmail(emailController.text);
+
+                                  // print(
+                                  //     "Pick Up Time: ${_pickUpTimeController.text}");
+                                  // print(
+                                  //     "Drop Time: ${_dropTimeController.text}");
 
                                   // pickImage();
                                   bookCarProvider.saveBookCar();
                                   if (bookCarProvider.isSuccess) {
                                     Helper.displaySnackBar(context,
                                         "Successfully Booked the car.");
+                                    setState(() {});
                                   } else {
                                     Helper.displaySnackBar(
                                         context, "Couldn't book the car.");
                                   }
-                                  print(
-                                      "Pick Up Time: ${_pickUpTimeController.text}");
-                                  print(
-                                      "Drop Time: ${_dropTimeController.text}");
+                                  // print(
+                                  //     "Pick Up Time: ${_pickUpTimeController.text}");
+                                  // print(
+                                  //     "Drop Time: ${_dropTimeController.text}");
                                   setState(() {});
                                 },
                                 child:

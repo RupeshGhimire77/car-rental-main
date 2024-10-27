@@ -199,6 +199,14 @@ class CarProvider extends ChangeNotifier {
     }
   }
 
+  Car? getCarById(String? id) {
+    try {
+      return carList.firstWhere((car) => car.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> getCarDetails() async {
     if (_getCarDetailsStatus != StatusUtil.loading) {
       setgetCarDetailsStatus(StatusUtil.loading);

@@ -12,7 +12,7 @@ class UserProvider extends ChangeNotifier {
   String? errorMessage;
 
   bool isSuccess = false;
-  String? role;
+  // String? role;
 
   bool showPassword = false;
   bool showConfirmPassword = false;
