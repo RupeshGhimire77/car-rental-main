@@ -145,5 +145,9 @@ class BookCarProvider extends ChangeNotifier {
       errorMessage = response.errorMessage;
       setGetBookCarStatus(StatusUtil.error);
     }
+
+    print("API response data: ${response.data}");
+    bookList =
+        response.data ?? []; // Ensures bookList is at least an empty list
   }
 }

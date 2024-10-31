@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/brand.dart';
 import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/model/user1.dart';
+import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
+import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
 import 'package:flutter_application_1/shared/custom_textform.dart';
 import 'package:flutter_application_1/utils/helper.dart';
@@ -15,10 +17,12 @@ import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/utils/string_const.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/admin_bottom.navbar.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/update_car_details.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:flutter_application_1/view/home/user%20login/login.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AdminDashboard extends StatefulWidget {
   final User1? user;
@@ -70,16 +74,17 @@ class AdminDashboardState extends State<AdminDashboard> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
+
     if (widget.car != null) {
       _initializeCarData(widget.car);
     }
 
-    super.initState();
     getCarData();
     getValue();
     getUserData();
     getBrandData();
+    getBookingData();
   }
 
   void _initializeCarData(Car? car) {
@@ -134,6 +139,13 @@ class AdminDashboardState extends State<AdminDashboard> {
     setState(() => isLoading = true);
     var provider = Provider.of<BrandProvider>(context, listen: false);
     await provider.getBrand(); // Ensure this updates the car list
+    setState(() => isLoading = false);
+  }
+
+  getBookingData() async {
+    setState(() => isLoading = true);
+    var provider = Provider.of<BookCarProvider>(context, listen: false);
+    await provider.getBookCar(); // Ensure this updates the car list
     setState(() => isLoading = false);
   }
 
@@ -265,7 +277,9 @@ class AdminDashboardState extends State<AdminDashboard> {
                 else if (selectedIndex == 2)
                   _buildCarList()
                 else if (selectedIndex == 3)
-                  _buildAddBrands(),
+                  _buildAddBrands()
+                else if (selectedIndex == 4)
+                  _buildRentedCarList()
               ]),
             ),
           ),
@@ -846,6 +860,280 @@ class AdminDashboardState extends State<AdminDashboard> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildRentedCarList() {
+    return Consumer2<CarProvider, BookCarProvider>(
+        builder: (context, carProvider, bookCarProvider, child) {
+      print(bookCarProvider.bookList);
+
+      if (bookCarProvider.bookList.isEmpty) {
+        return Center(
+          child: Text("No Cars Rented"),
+        );
+      }
+
+      return SizedBox(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Expanded(
+          child: ListView.builder(
+            itemCount: bookCarProvider.bookList.length,
+            scrollDirection: Axis.vertical,
+            itemBuilder: (context, index) {
+              final booking = bookCarProvider.bookList[index];
+              final carDetails = carProvider.getCarById(booking.carId);
+
+              if (carDetails == null) {
+                return Center(
+                  child: Text(
+                    "Car details not available",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
+              }
+
+              return Center(
+                child: SizedBox(
+                  // height: MediaQuery.of(context).size.height * .2,
+                  width: MediaQuery.of(context).size.width * .9,
+                  child: Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildCarCard(context, carDetails),
+                        // Text(
+                        //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
+                        Column(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 25),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Pick-up Location: ",
+                                      ),
+                                      Text(
+                                        "${booking.pickUpPoint}",
+                                        style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text("Start Date: "),
+                                      Text(
+                                        "${booking.startDate}",
+                                        style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Spacer(),
+                                      Text("End Date: "),
+                                      Text(
+                                        "${booking.endDate}",
+                                        style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text("Pick-up Time: "),
+                                      Text(
+                                        "${booking.pickUpTime}",
+                                        style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Spacer(),
+                                      Text("Drop Time: "),
+                                      Text(
+                                        "${booking.dropTime}",
+                                        style: TextStyle(
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 23, right: 4),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomBookButton(
+                                            onPressed: () {},
+                                            child: Text(
+                                              "Edit Details",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold),
+                                            )),
+                                      ),
+                                      Expanded(
+                                        child: CustomBookButton(
+                                            onPressed: () {},
+                                            child: Text(
+                                              "Cancel booking",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold),
+                                            )),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildCarCard(BuildContext context, Car car) {
+    return Column(
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: SizedBox(
+            height: 128,
+            width: 300,
+            child: GestureDetector(
+              onTap: () async {
+                // await carProvider.getCarDetails();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DescriptionPage(
+                        car: car,
+                      ),
+                    ));
+              },
+              child: Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    car.image != null
+                        ? Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius:
+                                    BorderRadiusDirectional.circular(10),
+                                child: FadeInImage(
+                                  placeholder: AssetImage(
+                                      'assets/images/placeholder.png'), // Use an asset image placeholder or use `Shimmer` widget here
+                                  image: NetworkImage(car.image!),
+                                  height: 120,
+                                  width: 180,
+                                  fit: BoxFit.cover,
+                                  imageErrorBuilder:
+                                      (context, error, stackTrace) {
+                                    return Shimmer.fromColors(
+                                      baseColor: Colors.red,
+                                      highlightColor: Colors.yellow,
+                                      child: Container(
+                                        color: Colors.grey,
+                                        height: 120,
+                                        width: 180,
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          'Image Error',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 20.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  placeholderErrorBuilder:
+                                      (context, error, stackTrace) {
+                                    return Shimmer.fromColors(
+                                      baseColor: Colors.deepPurple[300]!,
+                                      highlightColor: Colors.deepPurple[100]!,
+                                      child: Container(
+                                        color: Colors.white,
+                                        height: 120,
+                                        width: 180,
+                                        alignment: Alignment.center,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              // SizedBox(height: 5),
+                              Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(car.model!),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text("" + car.brand! + ""),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      "Rs. " + car.rentalPrice! + "/day",
+                                      style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ],
+                          )
+                        : Shimmer.fromColors(
+                            baseColor: Colors.red,
+                            highlightColor: Colors.yellow,
+                            child: Container(
+                              height: 120,
+                              width: 180,
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Shimmer',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 40.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
