@@ -148,6 +148,14 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  User1? getUserByEmail(String? email) {
+    try {
+      return userList.firstWhere((car) => car.email == email);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> checkEmailonSignUp() async {
     if (_getCheckEmailExistInSignUp != StatusUtil.loading) {
       setGetCheckEmailExistInSignUP(StatusUtil.loading);

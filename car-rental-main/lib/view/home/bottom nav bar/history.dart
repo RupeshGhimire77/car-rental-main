@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/model/book_car.dart';
 import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
+import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -214,42 +218,22 @@ class _HistoryState extends State<History> {
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 23, right: 4),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: CustomBookButton(
-                                                onPressed: () {},
-                                                child: Text(
-                                                  "Edit Details",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                )),
+                                // do not show  buttons if clicked cancelled
+                                booking.isCancelled == true
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 23, right: 4),
+                                        child: Text(
+                                          "Cancelled By You",
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          Expanded(
-                                            child: CustomBookButton(
-                                                onPressed: () {},
-                                                child: Text(
-                                                  "Cancel booking",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                )),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                        ),
+                                      )
+                                    : _buildActionButtons(context, booking,
+                                        bookCarProvider, index)
                               ],
                             ),
                           ],
@@ -399,4 +383,150 @@ class _HistoryState extends State<History> {
       ),
     );
   }
+
+  Widget _buildActionButtons(BuildContext context, BookCar booking,
+      BookCarProvider bookCarProvider, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 23, right: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomBookButton(
+              onPressed: () {
+                // Handle edit details
+                final String id = bookCarProvider.bookList[index].bookCarId!;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditBookingDetails(
+                        // id: id,
+                        booking: booking,
+                      ),
+                    ));
+              },
+              child: Text(
+                "Edit Details",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: CustomBookButton(
+              onPressed: () async {
+                String bookingId = bookCarProvider.bookList[index].bookCarId!;
+                await deleteCarBookingShowDialog(
+                    context, bookCarProvider, bookingId);
+              },
+              child: Text(
+                "Cancel booking",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  deleteCarBookingShowDialog(
+    BuildContext context,
+    BookCarProvider bookCarProvider,
+    String bookingId,
+  ) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              title: Text('Cancel Booking'),
+              content: Text('Are you sure you want to cancel this booking?'),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      print("Attempting to update booking with ID: $bookingId");
+                      await FirebaseFirestore.instance
+                          .collection("bookCar")
+                          .doc(bookingId)
+                          .update({'isCancelled': true});
+                      print("Booking cancelled successfully!");
+
+                      // Update locally and trigger a rebuild
+                      var booking = bookCarProvider.bookList
+                          .firstWhere((b) => b.bookCarId == bookingId);
+                      booking.isCancelled = true;
+
+                      // Trigger a rebuild of the ListView
+                      bookCarProvider.notifyListeners();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text("Booking cancelled successfully!")),
+                      );
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      print("Failed to cancel booking: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Failed to cancel booking: $e")),
+                      );
+                    }
+                  },
+                  child: Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('No'),
+                )
+              ]);
+        });
+  }
+
+  // deleteCarBookingShowDialog(
+  //     BuildContext context, BookCarProvider bookCarProvider, String brandId) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Cancel Booking'),
+  //         content: Text('Are you sure you want to cancel this booking?'),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () async {
+  //               // Update booking status in Firestore
+  //               await FirebaseFirestore.instance
+  //                   .collection("bookCar")
+  //                   .doc(brandId)
+  //                   .update({'isCancelled': true});
+
+  //               // Update locally
+  //               var booking = bookCarProvider.bookList
+  //                   .firstWhere((b) => b.bookCarId == brandId);
+  //               booking.isCancelled = true;
+
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 SnackBar(content: Text("Booking cancelled successfully!")),
+  //               );
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: Text('Yes'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: Text('No'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }

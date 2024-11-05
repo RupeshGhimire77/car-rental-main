@@ -817,24 +817,6 @@ class AdminDashboardState extends State<AdminDashboard> {
                             //     icon: Icon(Icons.edit)),
                             Row(
                               children: [
-                                // IconButton(
-                                //   onPressed: () {
-                                //     Navigator.push(
-                                //       context,
-                                //       MaterialPageRoute(
-                                //         builder: (context) => UpdateCarDetails(
-                                //             car: car), // Pass the car object
-                                //       ),
-                                //     ).then((_) {
-                                //       // This will be executed after returning from the edit page
-                                //       getCarData(); // Refresh the car list
-                                //     });
-                                //   },
-                                //   icon: Icon(
-                                //     Icons.edit,
-                                //     color: Colors.red,
-                                //   ),
-                                // ),
                                 IconButton(
                                     onPressed: () async {
                                       String brandId = brandProvider
@@ -864,8 +846,8 @@ class AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildRentedCarList() {
-    return Consumer2<CarProvider, BookCarProvider>(
-        builder: (context, carProvider, bookCarProvider, child) {
+    return Consumer3<CarProvider, BookCarProvider, UserProvider>(
+        builder: (context, carProvider, bookCarProvider, userProvider, child) {
       print(bookCarProvider.bookList);
 
       if (bookCarProvider.bookList.isEmpty) {
@@ -874,141 +856,184 @@ class AdminDashboardState extends State<AdminDashboard> {
         );
       }
 
-      return SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Expanded(
-          child: ListView.builder(
-            itemCount: bookCarProvider.bookList.length,
-            scrollDirection: Axis.vertical,
-            itemBuilder: (context, index) {
-              final booking = bookCarProvider.bookList[index];
-              final carDetails = carProvider.getCarById(booking.carId);
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            ListView.builder(
+              physics:
+                  NeverScrollableScrollPhysics(), // Disable scrolling for the ListView
+              shrinkWrap: true,
+              itemCount: bookCarProvider.bookList.length,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                final booking = bookCarProvider.bookList[index];
+                final bookingEmail = bookCarProvider.bookList[index].email;
+                final carDetails = carProvider.getCarById(booking.carId);
+                final userDetails = userProvider.getUserByEmail(booking.email);
 
-              if (carDetails == null) {
+                if (carDetails == null) {
+                  return Center(
+                    child: Text(
+                      "Car details not available",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  );
+                }
+
                 return Center(
-                  child: Text(
-                    "Car details not available",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                );
-              }
-
-              return Center(
-                child: SizedBox(
-                  // height: MediaQuery.of(context).size.height * .2,
-                  width: MediaQuery.of(context).size.width * .9,
-                  child: Card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildCarCard(context, carDetails),
-                        // Text(
-                        //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
-                        Column(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 25),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "Pick-up Location: ",
-                                      ),
-                                      Text(
-                                        "${booking.pickUpPoint}",
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text("Start Date: "),
-                                      Text(
-                                        "${booking.startDate}",
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Spacer(),
-                                      Text("End Date: "),
-                                      Text(
-                                        "${booking.endDate}",
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text("Pick-up Time: "),
-                                      Text(
-                                        "${booking.pickUpTime}",
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Spacer(),
-                                      Text("Drop Time: "),
-                                      Text(
-                                        "${booking.dropTime}",
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                  child: SizedBox(
+                    // height: MediaQuery.of(context).size.height * .2,
+                    width: MediaQuery.of(context).size.width * .9,
+                    child: Card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildCarCard(context, carDetails),
+                          // Text(
+                          //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
+                          Column(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Pick-up Location: ",
+                                        ),
+                                        Text(
+                                          "${booking.pickUpPoint}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text("Start Date: "),
+                                        Text(
+                                          "${booking.startDate}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Spacer(),
+                                        Text("End Date: "),
+                                        Text(
+                                          "${booking.endDate}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text("Pick-up Time: "),
+                                        Text(
+                                          "${booking.pickUpTime}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Spacer(),
+                                        Text("Drop Time: "),
+                                        Text(
+                                          "${booking.dropTime}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 23, right: 4),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: CustomBookButton(
-                                            onPressed: () {},
-                                            child: Text(
-                                              "Edit Details",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold),
-                                            )),
-                                      ),
-                                      Expanded(
-                                        child: CustomBookButton(
-                                            onPressed: () {},
-                                            child: Text(
-                                              "Cancel booking",
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold),
-                                            )),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Customer:",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text("Name: "),
+                                        Text(
+                                          "${userDetails!.name}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text("Mo. Number: "),
+                                        Text(
+                                          "${userDetails!.mobileNumber}",
+                                          style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            )
-                          ],
-                        ),
-                      ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 23, right: 4),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: CustomBookButton(
+                                              onPressed: () {},
+                                              child: Text(
+                                                "Edit Details",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )),
+                                        ),
+                                        Expanded(
+                                          child: CustomBookButton(
+                                              onPressed: () async {},
+                                              child: Text(
+                                                "Cancel booking",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
+          ],
         ),
       );
     });
@@ -1332,91 +1357,6 @@ class AdminDashboardState extends State<AdminDashboard> {
       },
     );
   }
-
-  // deleteBrandShowDialog(
-  //   BuildContext context,
-  //   BrandProvider brandProvider,
-  //   String brandId, // Accept brandId here
-  // ) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Delete Car'),
-  //         content: Text('Are you sure you want to delete this car?'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () async {
-  //               await brandProvider
-  //                   .deleteBrand(brandId); // Pass the brandId here
-
-  //               if (brandProvider.deleteBrandStatus == StatusUtil.success) {
-  //                 ScaffoldMessenger.of(context).showSnackBar(
-  //                   SnackBar(content: Text("Car deleted successfully!")),
-  //                 );
-  //                 // Call the method to refresh the brand data
-  //                 await brandProvider.getBrand(); // Refresh the brand list
-  //                 Navigator.of(context).pop(); // Close the dialog
-  //               } else if (brandProvider.deleteBrandStatus ==
-  //                   StatusUtil.error) {
-  //                 ScaffoldMessenger.of(context).showSnackBar(
-  //                   SnackBar(content: Text("Failed to delete car.")),
-  //                 );
-  //               }
-  //             },
-  //             child: Text('Yes'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //             },
-  //             child: Text('No'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
-  // editShowDialog(BuildContext context, CarProvider carProvider, Car car) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Edit'),
-  //         content: Text('Are you sure you want to Edit?'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () async {
-  //               await carProvider.saveCar();
-
-  //               //edit operation
-  //               // Navigator.pushAndRemoveUntil(
-  //               //     context,
-  //               //     MaterialPageRoute(
-  //               //         builder: (context) => AdminDashboard(
-  //               //               car: car,
-  //               //             )),
-  //               //     (route) => false); // Close the dialog
-  //               Navigator.push(
-  //                   context,
-  //                   MaterialPageRoute(
-  //                     builder: (context) => UpdateCarDetails(),
-  //                   ));
-  //             },
-  //             child: Text('Yes'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop(); // Close the dialog
-  //             },
-  //             child: Text('No'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   editShowDialog(BuildContext context, CarProvider carProvider, Car car) {
     showDialog(

@@ -4,4 +4,6 @@ import 'package:flutter_application_1/model/book_car.dart';
 abstract class BookCarService {
   Future<ApiResponse> saveBookCar(BookCar bookCar);
   Future<ApiResponse> getBookCar();
+  Future<ApiResponse> cancelBooking(String bookId);
+  Future<ApiResponse> updateBookingData(BookCar bookCar);
 }

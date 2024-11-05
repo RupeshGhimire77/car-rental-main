@@ -8,6 +8,8 @@ class BookCar {
   String? dropTime;
   String? bookCarImage;
 
+  bool? isCancelled;
+
   String? email;
 
   String? carId;
@@ -21,20 +23,23 @@ class BookCar {
       this.dropTime,
       this.bookCarImage,
       this.carId,
-      this.email});
+      this.email,
+      this.isCancelled = false});
 
   BookCar.fromJson(Map<String, dynamic> json) {
     bookCarId = json['bookCarId'];
-    pickUpPoint = json['pickUpPoint'];
+    pickUpPoint = json['pickUpPoint'] ?? '';
     // destinationPoint = json['destinationPoint'];
-    startDate = json['startDate'];
-    endDate = json['endDate'];
-    pickUpTime = json['pickUpTime'];
-    dropTime = json['dropTime'];
-    bookCarImage = json['bookCarImage'];
+    startDate = json['startDate'] ?? '';
+    endDate = json['endDate'] ?? '';
+    pickUpTime = json['pickUpTime'] ?? '';
+    dropTime = json['dropTime'] ?? '';
+    bookCarImage = json['bookCarImage'] ?? '';
 
-    carId = json['carId'];
-    email = json['email'];
+    carId = json['carId'] ?? '';
+    email = json['email'] ?? '';
+
+    isCancelled = json['isCancelled'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -50,6 +55,8 @@ class BookCar {
 
     data['carId'] = this.carId;
     data['email'] = this.email;
+
+    data['isCancelled'] = this.isCancelled;
     return data;
   }
 }

@@ -62,8 +62,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
   TextEditingController _pickUpTimeController = TextEditingController();
   TextEditingController _dropTimeController = TextEditingController();
 
-  final TimeOfDay _minTime = TimeOfDay(hour: 7, minute: 0); // 7 AM
-  final TimeOfDay _maxTime = TimeOfDay(hour: 19, minute: 0); // 7 PM
+  // final TimeOfDay _minTime = TimeOfDay(hour: 7, minute: 0); // 7 AM
+  // final TimeOfDay _maxTime = TimeOfDay(hour: 19, minute: 0); // 7 PM
 
   String? name, email, role;
 
@@ -778,7 +778,10 @@ class _DescriptionPageState extends State<DescriptionPage> {
   }
 
   Future<void> _selectPickUpTime(BuildContext context) async {
-    TimeOfDay? pickedTime = await _showCustomTimePicker(context);
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
 
     if (pickedTime != null) {
       setState(() {
@@ -793,7 +796,10 @@ class _DescriptionPageState extends State<DescriptionPage> {
   }
 
   Future<void> _selectDropTime(BuildContext context) async {
-    TimeOfDay? pickedTime = await _showCustomTimePicker(context);
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
 
     if (pickedTime != null) {
       setState(() {
@@ -807,65 +813,71 @@ class _DescriptionPageState extends State<DescriptionPage> {
     }
   }
 
-// Function to select pick up time
-//   Future<void> _selectPickUpTime(BuildContext context) async {
-//     TimeOfDay? pickedTime = await _showCustomTimePicker(context);
+  // Future<void> _selectPickUpTime(BuildContext context) async {
+  //   TimeOfDay? pickedTime = await _showCustomTimePicker(context);
 
-//     if (pickedTime != null) {
-//       setState(() {
-//         _selectedPickUpTime = pickedTime;
-//         _pickUpTimeController.text = pickedTime.format(context);
-//       });
-//     }
-//   }
+  //   if (pickedTime != null) {
+  //     setState(() {
+  //       _selectedPickUpTime = pickedTime;
+  //       _pickUpTimeController.text = pickedTime.format(context);
 
-// // Function to select drop time with 30-minute intervals
-//   Future<void> _selectDropTime(BuildContext context) async {
-//     TimeOfDay? pickedTime = await _showCustomTimePicker(context);
+  //       // Update provider with the selected pickup time
+  //       Provider.of<BookCarProvider>(context, listen: false)
+  //           .setPickUpTime(_pickUpTimeController.text);
+  //     });
+  //   }
+  // }
 
-//     if (pickedTime != null) {
-//       setState(() {
-//         _selectedDropTime = pickedTime;
-//         _dropTimeController.text = pickedTime.format(context);
-//       });
-//     }
-//   }
+  // Future<void> _selectDropTime(BuildContext context) async {
+  //   TimeOfDay? pickedTime = await _showCustomTimePicker(context);
+
+  //   if (pickedTime != null) {
+  //     setState(() {
+  //       _selectedDropTime = pickedTime;
+  //       _dropTimeController.text = pickedTime.format(context);
+
+  //       // Update provider with the selected drop time
+  //       Provider.of<BookCarProvider>(context, listen: false)
+  //           .setDropTime(_dropTimeController.text);
+  //     });
+  //   }
+  // }
 
 // Custom Time Picker with 30-minute intervals
-  Future<TimeOfDay?> _showCustomTimePicker(BuildContext context) async {
-    List<TimeOfDay> timeOptions = _generateTimeOptions();
-    return showDialog<TimeOfDay>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text('Select Time'),
-          children: timeOptions.map((time) {
-            return SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, time);
-              },
-              child: Text(time.format(context)),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
+//   Future<TimeOfDay?> _showCustomTimePicker(BuildContext context) async {
+//     List<TimeOfDay> timeOptions = _generateTimeOptions();
+//     return showDialog<TimeOfDay>(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return SimpleDialog(
+//           title: Text('Select Time'),
+//           children: timeOptions.map((time) {
+//             return SimpleDialogOption(
+//               onPressed: () {
+//                 Navigator.pop(context, time);
+//               },
+//               child: Text(time.format(context)),
+//             );
+//           }).toList(),
+//         );
+//       },
+//     );
+//   }
 
-// Generate time options in 30-minute intervals
-  List<TimeOfDay> _generateTimeOptions() {
-    List<TimeOfDay> timeOptions = [];
-    int startHour = _minTime.hour;
-    int endHour = _maxTime.hour;
+// // Generate time options in 30-minute intervals
+//   List<TimeOfDay> _generateTimeOptions() {
+//     List<TimeOfDay> timeOptions = [];
+//     int startHour = _minTime.hour;
+//     int endHour = _maxTime.hour;
 
-    for (int hour = startHour; hour <= endHour; hour++) {
-      timeOptions.add(TimeOfDay(hour: hour, minute: 0));
-      if (hour != endHour) {
-        timeOptions.add(TimeOfDay(hour: hour, minute: 30));
-      }
-    }
-    return timeOptions;
-  }
+//     for (int hour = startHour; hour <= endHour; hour++) {
+//       timeOptions.add(TimeOfDay(hour: hour, minute: 0));
+//       if (hour != endHour) {
+//         timeOptions.add(TimeOfDay(hour: hour, minute: 30));
+//       }
+//     }
+//     return timeOptions;
+//   }
 
   pickImage() async {
     setState(() {

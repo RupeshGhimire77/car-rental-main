@@ -106,7 +106,6 @@ class CarServiceImpl implements CarService {
     } catch (e) {
       return ApiResponse(
           statusUtil: StatusUtil.error, errorMessage: e.toString());
-      ;
     }
   }
 }

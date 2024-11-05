@@ -11,6 +11,8 @@ class BookCarProvider extends ChangeNotifier {
   String? bookCarId;
   String? carId;
 
+  bool? isCancelled;
+
   TextEditingController pickUpPointController = TextEditingController();
   // TextEditingController? destinationPointController;
   TextEditingController startDateController = TextEditingController();
@@ -25,7 +27,9 @@ class BookCarProvider extends ChangeNotifier {
   String? errorMessage;
 
   TextEditingController? bookCarImage;
+
   bool isSuccess = false;
+  bool isDeleteBooking = false;
 
   List<BookCar> bookList = [];
 
@@ -37,12 +41,26 @@ class BookCarProvider extends ChangeNotifier {
   StatusUtil _getBookCarStatus = StatusUtil.none;
   StatusUtil get getBookCarStatus => _getBookCarStatus;
 
-  setEmail(value) {
-    emailTextField = TextEditingController(text: value);
+  StatusUtil _deleteCarBookingStatus = StatusUtil.none;
+  StatusUtil get deleteCarBookingStatus => _deleteCarBookingStatus;
+
+  StatusUtil _updateBookingStatus = StatusUtil.none;
+  StatusUtil get updateBookingStatus => _updateBookingStatus;
+
+  // setEmail(value) {
+  //   emailTextField = TextEditingController(text: value);
+  // }
+
+  // setCarId(value) {
+  //   carIdTextField = TextEditingController(text: value);
+  // }
+
+  setEmail(String value) {
+    emailTextField?.text = value;
   }
 
-  setCarId(value) {
-    carIdTextField = TextEditingController(text: value);
+  setCarId(String value) {
+    carIdTextField?.text = value;
   }
 
   void setPickUpPoint(String value) {
@@ -96,25 +114,34 @@ class BookCarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  setGetDeleteCarBookingStatus(StatusUtil status) {
+    _deleteCarBookingStatus = status;
+    notifyListeners();
+  }
+
+  setUpdateBookingStatus(StatusUtil status) {
+    _updateBookingStatus = status;
+    notifyListeners();
+  }
+
   Future<void> saveBookCar() async {
     if (_saveBookCarStatus != StatusUtil.loading) {
       setSaveBookCarStatus(StatusUtil.loading);
     }
 
     BookCar bookCar = BookCar(
-      bookCarId: bookCarId,
-      pickUpPoint: pickUpPointController.text,
-      // destinationPoint: destinationPointController!.text,
-      // destinationPoint: destinationPoint,
-      startDate: startDateController.text,
-      endDate: endDateController.text,
-      pickUpTime: pickUpTimeController.text,
-      dropTime: dropTimeController.text,
-      bookCarImage: bookCarImage!.text,
-
-      carId: carIdTextField?.text,
-      email: emailTextField?.text,
-    );
+        bookCarId: bookCarId,
+        pickUpPoint: pickUpPointController.text,
+        // destinationPoint: destinationPointController!.text,
+        // destinationPoint: destinationPoint,
+        startDate: startDateController.text,
+        endDate: endDateController.text,
+        pickUpTime: pickUpTimeController.text,
+        dropTime: dropTimeController.text,
+        bookCarImage: bookCarImage!.text,
+        carId: carIdTextField?.text,
+        email: emailTextField?.text,
+        isCancelled: false);
 
     ApiResponse response = await bookCarService.saveBookCar(bookCar);
 
@@ -122,8 +149,38 @@ class BookCarProvider extends ChangeNotifier {
       isSuccess = response.data;
       setSaveBookCarStatus(StatusUtil.success);
     } else if (response.statusUtil == StatusUtil.error) {
-      errorMessage = response.data;
+      errorMessage = response.errorMessage;
       setSaveBookCarStatus(StatusUtil.error);
+    }
+  }
+
+  Future<void> updateBookCar() async {
+    if (_updateBookingStatus != StatusUtil.loading) {
+      setUpdateBookingStatus(StatusUtil.loading);
+    }
+
+    BookCar bookCar = BookCar(
+        bookCarId: bookCarId,
+        pickUpPoint: pickUpPointController.text,
+        // destinationPoint: destinationPointController!.text,
+        // destinationPoint: destinationPoint,
+        startDate: startDateController.text,
+        endDate: endDateController.text,
+        pickUpTime: pickUpTimeController.text,
+        dropTime: dropTimeController.text,
+        bookCarImage: bookCarImage!.text,
+        carId: carIdTextField?.text,
+        email: emailTextField?.text,
+        isCancelled: false);
+
+    ApiResponse response = await bookCarService.updateBookingData(bookCar);
+
+    if (response.statusUtil == StatusUtil.success) {
+      isSuccess = response.data;
+      setUpdateBookingStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.errorMessage;
+      setUpdateBookingStatus(StatusUtil.error);
     }
   }
 
@@ -146,8 +203,23 @@ class BookCarProvider extends ChangeNotifier {
       setGetBookCarStatus(StatusUtil.error);
     }
 
-    print("API response data: ${response.data}");
+    // print("API response data: ${response.data}");
     bookList =
         response.data ?? []; // Ensures bookList is at least an empty list
+  }
+
+  Future<void> deleteCarBooking(String brandId) async {
+    if (_deleteCarBookingStatus != StatusUtil.loading) {
+      setGetDeleteCarBookingStatus(StatusUtil.loading);
+    }
+
+    ApiResponse response = await bookCarService.cancelBooking(brandId);
+    if (response.statusUtil == StatusUtil.success) {
+      isDeleteBooking = response.data;
+      setGetDeleteCarBookingStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.data;
+      setGetDeleteCarBookingStatus(StatusUtil.error);
+    }
   }
 }

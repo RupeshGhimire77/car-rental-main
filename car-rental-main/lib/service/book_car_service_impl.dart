@@ -52,4 +52,43 @@ class BookCarServiceImpl implements BookCarService {
           statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
     }
   }
+
+  @override
+  Future<ApiResponse> cancelBooking(String bookId) async {
+    bool isSuccess = false;
+
+    if (await Helper.isInternetConnectionAvailable()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("bookCar")
+            .doc(bookId)
+            .update({'isCancelled': true}) // Update the isCancelled field
+            .then((value) {
+          isSuccess = true;
+        });
+
+        return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
+      } catch (e) {
+        return ApiResponse(
+            statusUtil: StatusUtil.error, errorMessage: e.toString());
+      }
+    }
+    return ApiResponse(
+        statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
+  }
+
+  @override
+  Future<ApiResponse> updateBookingData(BookCar bookCar) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("bookCar")
+          .doc(bookCar.bookCarId)
+          .update(bookCar.toJson());
+
+      return ApiResponse(statusUtil: StatusUtil.success);
+    } catch (e) {
+      return ApiResponse(
+          statusUtil: StatusUtil.error, errorMessage: e.toString());
+    }
+  }
 }
