@@ -12,14 +12,18 @@ class BookCarServiceImpl implements BookCarService {
     bool isSuccess = false;
     if (await Helper.isInternetConnectionAvailable()) {
       try {
-        await FirebaseFirestore.instance
+        // Add the document and retrieve the DocumentReference
+        DocumentReference docRef = await FirebaseFirestore.instance
             .collection("bookCar")
-            .add(bookCar.toJson())
-            .then(
-          (value) {
-            isSuccess = true;
-          },
-        );
+            .add(bookCar.toJson());
+
+        // Set bookCarId to the generated ID
+        bookCar.bookCarId = docRef.id;
+
+        // Update the document with the new bookCarId field
+        await docRef.update({'bookCarId': bookCar.bookCarId});
+
+        isSuccess = true;
         return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
       } catch (e) {
         return ApiResponse(
@@ -54,15 +58,18 @@ class BookCarServiceImpl implements BookCarService {
   }
 
   @override
-  Future<ApiResponse> cancelBooking(String bookId) async {
+  Future<ApiResponse> cancelBooking(String bookCarId, BookCar? bookcar) async {
     bool isSuccess = false;
 
     if (await Helper.isInternetConnectionAvailable()) {
       try {
         await FirebaseFirestore.instance
             .collection("bookCar")
-            .doc(bookId)
-            .update({'isCancelled': true}) // Update the isCancelled field
+            .doc(bookCarId)
+            .update({
+          'bookCarId': bookCarId,
+          'isCancelled': true,
+        }) // Update the isCancelled field
             .then((value) {
           isSuccess = true;
         });

@@ -33,6 +33,84 @@ class BookCarProvider extends ChangeNotifier {
 
   List<BookCar> bookList = [];
 
+  final List<Map<String, List<String>>> places = [
+    {
+      'Dhulikhel': [
+        'Dhulikhel Bus Park',
+        'Bhaktapur Durbar Square',
+        'Dhulikhel Hospital',
+        'Kali Temple',
+        'Buddha Stupa',
+      ]
+    },
+    {
+      'Panauti': [
+        'Panauti Bus Park',
+        'Panauti Museum',
+        'Indreshwor Mahadev Temple',
+        'Brahmayani Temple',
+        'Panauti Heritage Area',
+      ]
+    },
+    {
+      'Banepa': [
+        'Banepa Bus Park',
+        'Bhimsen Temple',
+        'Banepa Durbar Square',
+        'Kankrej Bhanjyang',
+        'Khadgakot',
+      ]
+    },
+    {
+      'Kalaiya': [
+        'Kalaiya Market',
+        'Kalaiya Bus Park',
+      ]
+    },
+    {
+      'Nala': [
+        'Nala Bus Park',
+        'Nala Temple',
+      ]
+    },
+    {
+      'Namobuddha': [
+        'Namobuddha Monastery',
+        'Namobuddha Stupa',
+      ]
+    },
+    {
+      'Sankhu': [
+        'Sankhu Bus Park',
+        'Sankhu Durbar Square',
+        'Bajrayogini Temple',
+      ]
+    },
+    {
+      'Kavre': [
+        'Kavre Bus Park',
+        'Various local markets',
+      ]
+    },
+    {
+      'Bhakundebesi': [
+        'Bhakundebesi Market',
+        'Local temples and shrines',
+      ]
+    },
+  ];
+
+  // Flatten the list to get all place names
+  List<String> getAllPlaces() {
+    List<String> allPlaces = [];
+    for (var place in places) {
+      place.forEach((key, value) {
+        allPlaces.addAll(value); // Add all locations from each place
+      });
+    }
+    return allPlaces;
+  }
+
   BookCarService bookCarService = BookCarServiceImpl();
 
   StatusUtil _saveBookCarStatus = StatusUtil.none;
@@ -55,13 +133,16 @@ class BookCarProvider extends ChangeNotifier {
   //   carIdTextField = TextEditingController(text: value);
   // }
 
-  setEmail(String value) {
-    emailTextField?.text = value;
-  }
+  // setEmail(String value) {
+  //   emailTextField?.text = value;
+  //   notifyListeners();
+  //   print(emailTextField?.text);
+  // }
 
-  setCarId(String value) {
-    carIdTextField?.text = value;
-  }
+  // setCarId(String value) {
+  //   carIdTextField?.text = value;
+  //   notifyListeners();
+  // }
 
   void setPickUpPoint(String value) {
     pickUpPointController.text = value;
@@ -124,7 +205,7 @@ class BookCarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveBookCar() async {
+  Future<void> saveBookCar({String? id, String? email}) async {
     if (_saveBookCarStatus != StatusUtil.loading) {
       setSaveBookCarStatus(StatusUtil.loading);
     }
@@ -139,8 +220,8 @@ class BookCarProvider extends ChangeNotifier {
         pickUpTime: pickUpTimeController.text,
         dropTime: dropTimeController.text,
         bookCarImage: bookCarImage!.text,
-        carId: carIdTextField?.text,
-        email: emailTextField?.text,
+        carId: id,
+        email: email,
         isCancelled: false);
 
     ApiResponse response = await bookCarService.saveBookCar(bookCar);
@@ -154,7 +235,7 @@ class BookCarProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateBookCar() async {
+  Future<void> updateBookCar({String? email, String? carId}) async {
     if (_updateBookingStatus != StatusUtil.loading) {
       setUpdateBookingStatus(StatusUtil.loading);
     }
@@ -169,8 +250,8 @@ class BookCarProvider extends ChangeNotifier {
         pickUpTime: pickUpTimeController.text,
         dropTime: dropTimeController.text,
         bookCarImage: bookCarImage!.text,
-        carId: carIdTextField?.text,
-        email: emailTextField?.text,
+        carId: carIdTextField?.text ?? '',
+        email: emailTextField?.text ?? '',
         isCancelled: false);
 
     ApiResponse response = await bookCarService.updateBookingData(bookCar);
@@ -208,14 +289,15 @@ class BookCarProvider extends ChangeNotifier {
         response.data ?? []; // Ensures bookList is at least an empty list
   }
 
-  Future<void> deleteCarBooking(String brandId) async {
+  Future<void> cancelCarBooking(String bookId) async {
     if (_deleteCarBookingStatus != StatusUtil.loading) {
       setGetDeleteCarBookingStatus(StatusUtil.loading);
     }
-
-    ApiResponse response = await bookCarService.cancelBooking(brandId);
+    BookCar bookCar = BookCar(isCancelled: true);
+    ApiResponse response = await bookCarService.cancelBooking(bookId, bookCar);
     if (response.statusUtil == StatusUtil.success) {
       isDeleteBooking = response.data;
+      getBookCar();
       setGetDeleteCarBookingStatus(StatusUtil.success);
     } else if (response.statusUtil == StatusUtil.error) {
       errorMessage = response.data;

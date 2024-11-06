@@ -999,10 +999,10 @@ class AdminDashboardState extends State<AdminDashboard> {
                                           child: CustomBookButton(
                                               onPressed: () {},
                                               child: Text(
-                                                "Edit Details",
+                                                "Cancel Booking",
                                                 style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 13,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               )),
@@ -1011,10 +1011,10 @@ class AdminDashboardState extends State<AdminDashboard> {
                                           child: CustomBookButton(
                                               onPressed: () async {},
                                               child: Text(
-                                                "Cancel booking",
+                                                "Accept Booking",
                                                 style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 13,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               )),

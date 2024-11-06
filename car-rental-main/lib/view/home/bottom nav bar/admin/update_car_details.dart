@@ -39,18 +39,23 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
     getCarData(); // Fetch car data if necessary
   }
 
+  TextEditingController carImageUpdateController = TextEditingController();
+
   void _initializeCarData(Car? car) {
     var provider = Provider.of<CarProvider>(context, listen: false);
     provider.id = car?.id ?? "";
     provider.model = car?.model ?? "";
     provider.year = car?.year ?? "";
-    provider.image = car?.image ?? "";
+
+    provider.image = widget.car?.image ?? "";
     provider.brand = car?.brand ?? "";
     provider.vehicalType = car?.vehicleType ?? "";
     provider.seatingCapacity = car?.seatingCapacity ?? "";
     provider.fuelType = car?.fuelType ?? "";
     provider.mileage = car?.mileage ?? "";
     provider.rentalPrice = car?.rentalPrice ?? "";
+
+    carImageUpdateController.text = widget.car?.image ?? "";
   }
 
   Future<void> getCarData() async {
@@ -161,10 +166,12 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 20),
                               )),
+
                     if (downloadUrl != null)
                       Visibility(
-                        visible: false,
+                        // visible: false,
                         child: CustomTextFormField(
+                          initialValue: carProvider.imageTextField.toString(),
                           controller: carProvider.setImage(downloadUrl!),
                           labelText: "Car Image",
                         ),

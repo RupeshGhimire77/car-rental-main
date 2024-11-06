@@ -25,11 +25,11 @@ class EditBookingDetails extends StatefulWidget {
 }
 
 class _EditBookingDetailsState extends State<EditBookingDetails> {
-  final TextEditingController emailController = TextEditingController();
+  // final TextEditingController emailController = TextEditingController();
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
 
-  final TextEditingController carIdController = TextEditingController();
+  // final TextEditingController carIdController = TextEditingController();
 
   final TextEditingController bookCarImageController = TextEditingController();
 
@@ -50,15 +50,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
       var provider = Provider.of<BookCarProvider>(context, listen: false);
       provider.bookCarId = widget.booking?.bookCarId ?? "";
 
-      carIdController.text = widget.booking?.carId ?? "";
-
-      emailController.text = widget.booking?.email ?? "";
-
       provider.setPickUpPoint(widget.booking?.pickUpPoint ?? "");
       provider.setPickUpTime(widget.booking?.pickUpTime ?? "");
       provider.setDropTime(widget.booking?.dropTime ?? "");
 
-      bookCarImageController.text = widget.booking?.bookCarImage ?? '';
+      provider.bookCarImageController.text = widget.booking?.bookCarImage ?? '';
 
       String? startDate = widget.booking?.startDate;
       if (startDate != null && startDate.isNotEmpty) {
@@ -81,6 +77,22 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
     getBookCarDetails();
   }
 
+  final _formKey = GlobalKey<FormState>();
+  String? name, email, role;
+
+  getValue() {
+    Future.delayed(Duration.zero, () async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var provider = Provider.of<BookCarProvider>(context, listen: false);
+      setState(() {
+        name = prefs.getString("name");
+        email = prefs.getString("email");
+
+        role = prefs.getString("role");
+      });
+    });
+  }
+
   Future<void> getBookCarDetails() async {
     setState(() => isLoading = true);
     var provider = Provider.of<BookCarProvider>(context, listen: false);
@@ -88,12 +100,12 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
     setState(() => isLoading = false);
   }
 
-  Future<void> getValue() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      emailController.text = prefs.getString("email") ?? "";
-    });
-  }
+  // Future<void> getValue() async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     BookCarProvider().emailTextField!.text = prefs.getString("email") ?? "";
+  //   });
+  // }
 
   TimeOfDay? _selectedPickUpTime;
   TimeOfDay? _selectedDropTime;
@@ -152,25 +164,25 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                               Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Visibility(
-                            visible: false,
-                            child: CustomBookTextfield(
-                              // labelText: "user email: ${email}",
-                              // initialValue: email ?? "",
-                              controller: emailController,
-                              // bookCarProvider.setCarId("${email}"),
-                            ),
-                          ),
-                          Visibility(
-                            visible: false,
-                            child: CustomBookTextfield(
-                              labelText: "Car Id",
-                              // initialValue: widget.car!.id,
-                              // controller:
-                              //     bookCarProvider.setCarId("${widget.car!.id}"),
-                              controller: carIdController,
-                            ),
-                          ),
+                          // Visibility(
+                          //   visible: false,
+                          //   child: CustomBookTextfield(
+                          //     // labelText: "user email: ${email}",
+                          //     // initialValue: email ?? "",
+                          //     controller: bookCarProvider.emailTextField,
+                          //     // bookCarProvider.setCarId("${email}"),
+                          //   ),
+                          // ),
+                          // Visibility(
+                          //   visible: false,
+                          //   child: CustomBookTextfield(
+                          //     labelText: "Car Id",
+                          //     // initialValue: widget.car!.id,
+                          //     // controller:
+                          //     //     bookCarProvider.setCarId("${widget.car!.id}"),
+                          //     controller: bookCarProvider.carIdTextField,
+                          //   ),
+                          // ),
 
                           Text("Pick up Point",
                               style: TextStyle(
@@ -195,6 +207,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                               return CustomBookTextfield(
                                 hintText: "Pick up Location",
                                 controller: textEditingController,
+                                validator: (p0) {
+                                  if (p0!.isEmpty) {
+                                    return "Type a location";
+                                  }
+                                },
                                 // initialValue: bookCar!.pickUpPoint,
 
                                 // focusNode: focusNode,
@@ -239,6 +256,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                           await _selectStartDate(context),
                                       child: AbsorbPointer(
                                         child: CustomBookTextfield(
+                                          validator: (p0) {
+                                            if (p0!.isEmpty) {
+                                              return "enter a date";
+                                            }
+                                          },
                                           controller: _startDateController,
                                           hintText: "Start Date",
                                           suffixIcon: Icon(Icons.calendar_month,
@@ -262,6 +284,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                           await _selectEndDate(context),
                                       child: AbsorbPointer(
                                         child: CustomBookTextfield(
+                                          validator: (p0) {
+                                            if (p0!.isEmpty) {
+                                              return "enter a date";
+                                            }
+                                          },
                                           controller: _endDateController,
                                           hintText: "End Date",
                                           suffixIcon: Icon(Icons.calendar_month,
@@ -293,6 +320,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                           await _selectPickUpTime(context),
                                       child: AbsorbPointer(
                                         child: CustomBookTextfield(
+                                          validator: (p0) {
+                                            if (p0!.isEmpty) {
+                                              return "Enter Pick up time";
+                                            }
+                                          },
                                           controller: bookCarProvider
                                               .pickUpTimeController,
                                           suffixIcon: IconButton(
@@ -327,6 +359,11 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                           await _selectDropTime(context),
                                       child: AbsorbPointer(
                                         child: CustomBookTextfield(
+                                          validator: (p0) {
+                                            if (p0!.isEmpty) {
+                                              return "enter drop time";
+                                            }
+                                          },
                                           controller: bookCarProvider
                                               .dropTimeController,
                                           // controller:
@@ -448,10 +485,10 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                               visible: false,
                               child: Expanded(
                                 child: CustomTextFormField(
-                                  // controller: bookCarProvider
-                                  //     .setBookCarImage(downloadUrl!),
-                                  // initialValue: bookCar.bookCarImage,
-                                  controller: bookCarImageController,
+                                  controller: bookCarProvider
+                                      .setBookCarImage(downloadUrl!),
+                                  initialValue: bookCar.bookCarImage,
+                                  // controller: bookCarImageController,
                                   labelText: "License Image",
                                 ),
                               ),
@@ -459,23 +496,23 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
 
                           CustomBookButton(
                               onPressed: () {
-                                if (bookCarProvider
-                                        .pickUpPointController.text.isEmpty ||
-                                    bookCarProvider
-                                        .startDateController.text.isEmpty ||
-                                    bookCarProvider
-                                        .endDateController.text.isEmpty ||
-                                    bookCarProvider
-                                        .pickUpTimeController.text.isEmpty ||
-                                    bookCarProvider
-                                        .dropTimeController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text('Please fill in all fields')),
-                                  );
-                                  return;
-                                }
+                                // if (bookCarProvider
+                                //         .pickUpPointController.text.isEmpty ||
+                                //     bookCarProvider
+                                //         .startDateController.text.isEmpty ||
+                                //     bookCarProvider
+                                //         .endDateController.text.isEmpty ||
+                                //     bookCarProvider
+                                //         .pickUpTimeController.text.isEmpty ||
+                                //     bookCarProvider
+                                //         .dropTimeController.text.isEmpty) {
+                                //   ScaffoldMessenger.of(context).showSnackBar(
+                                //     SnackBar(
+                                //         content: Text(
+                                //             'Please fill in all fields')),
+                                //   );
+                                //   return;
+                                // }
                                 bookCarProvider
                                     .setStartDate(_startDateController.text);
                                 bookCarProvider
@@ -485,18 +522,19 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                 bookCarProvider.setDropTime(
                                     bookCarProvider.dropTimeController.text);
 
-                                bookCarProvider.setEmail(emailController.text);
-
                                 // print(
                                 //     "Pick Up Time: ${_pickUpTimeController.text}");
                                 // print(
                                 //     "Drop Time: ${_dropTimeController.text}");
 
                                 // pickImage();
-                                bookCarProvider.updateBookCar();
+                                bookCarProvider.updateBookCar(
+                                    email: email,
+                                    carId: widget.booking?.bookCarId);
                                 if (bookCarProvider.isSuccess) {
                                   Helper.displaySnackBar(context,
                                       "Successfully updated the booking details.");
+                                  Navigator.pop(context);
                                   setState(() {});
                                 } else {
                                   Helper.displaySnackBar(context,

@@ -137,14 +137,14 @@ class _HistoryState extends State<History> {
                   final booking = userBookings[index];
                   final carDetails = carProvider.getCarById(booking.carId);
 
-                  if (carDetails == null) {
-                    return Center(
-                      child: Text(
-                        "Car details not available",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  }
+                  // if (carDetails == null) {
+                  //   return Center(
+                  //     child: Text(
+                  //       "Car details not available",
+                  //       style: TextStyle(color: Colors.white),
+                  //     ),
+                  //   );
+                  // }
 
                   return Center(
                     child: SizedBox(
@@ -154,7 +154,7 @@ class _HistoryState extends State<History> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildCarCard(context, carDetails),
+                            _buildCarCard(context, carDetails!),
                             // Text(
                             //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
                             Column(
@@ -232,8 +232,8 @@ class _HistoryState extends State<History> {
                                           ),
                                         ),
                                       )
-                                    : _buildActionButtons(context, booking,
-                                        bookCarProvider, index)
+                                    : _buildActionButtons(
+                                        context, booking, bookCarProvider)
                               ],
                             ),
                           ],
@@ -384,8 +384,8 @@ class _HistoryState extends State<History> {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, BookCar booking,
-      BookCarProvider bookCarProvider, int index) {
+  Widget _buildActionButtons(
+      BuildContext context, BookCar booking, BookCarProvider bookCarProvider) {
     return Padding(
       padding: const EdgeInsets.only(left: 23, right: 4),
       child: Row(
@@ -394,7 +394,7 @@ class _HistoryState extends State<History> {
             child: CustomBookButton(
               onPressed: () {
                 // Handle edit details
-                final String id = bookCarProvider.bookList[index].bookCarId!;
+                // final String id = bookCarProvider.bookList[index].bookCarId!;
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -417,9 +417,10 @@ class _HistoryState extends State<History> {
           Expanded(
             child: CustomBookButton(
               onPressed: () async {
-                String bookingId = bookCarProvider.bookList[index].bookCarId!;
-                await deleteCarBookingShowDialog(
-                    context, bookCarProvider, bookingId);
+                // BookCar booking = bookCarProvider.bookList[index];
+                // String bookingId = booking.bookCarId!;
+                await cancelCarBookingShowDialog(
+                    context, bookCarProvider, booking);
               },
               child: Text(
                 "Cancel booking",
@@ -435,59 +436,111 @@ class _HistoryState extends State<History> {
     );
   }
 
-  deleteCarBookingShowDialog(
+  cancelCarBookingShowDialog(
     BuildContext context,
     BookCarProvider bookCarProvider,
-    String bookingId,
+    BookCar booking,
   ) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              title: Text('Cancel Booking'),
-              content: Text('Are you sure you want to cancel this booking?'),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    try {
-                      print("Attempting to update booking with ID: $bookingId");
-                      await FirebaseFirestore.instance
-                          .collection("bookCar")
-                          .doc(bookingId)
-                          .update({'isCancelled': true});
-                      print("Booking cancelled successfully!");
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cancel Booking'),
+          content: Text('Are you sure you want to cancel this booking?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  String bookingId = booking.bookCarId!;
+                  print("Attempting to cancel booking with ID: $bookingId");
 
-                      // Update locally and trigger a rebuild
-                      var booking = bookCarProvider.bookList
-                          .firstWhere((b) => b.bookCarId == bookingId);
-                      booking.isCancelled = true;
+                  await bookCarProvider.cancelCarBooking(bookingId);
+                  print("Booking cancelled successfully!");
 
-                      // Trigger a rebuild of the ListView
-                      bookCarProvider.notifyListeners();
+                  // Update locally and trigger a rebuild
+                  booking.isCancelled = true;
+                  bookCarProvider.notifyListeners();
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text("Booking cancelled successfully!")),
-                      );
-                      Navigator.of(context).pop();
-                    } catch (e) {
-                      print("Failed to cancel booking: $e");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Failed to cancel booking: $e")),
-                      );
-                    }
-                  },
-                  child: Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('No'),
-                )
-              ]);
-        });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Booking cancelled successfully!")),
+                  );
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  print("Failed to cancel booking: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to cancel booking: $e")),
+                  );
+                }
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            )
+          ],
+        );
+      },
+    );
   }
+
+  // cancelCarBookingShowDialog(
+  //   BuildContext context,
+  //   BookCarProvider bookCarProvider,
+  //   String bookingId,
+  // ) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //             title: Text('Cancel Booking'),
+  //             content: Text('Are you sure you want to cancel this booking?'),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () async {
+  //                   try {
+  //                     print("Attempting to update booking with ID: $bookingId");
+  //                     // await FirebaseFirestore.instance
+  //                     //     .collection("bookCar")
+  //                     //     .doc(bookingId)
+  //                     //     .update({'isCancelled': true});
+
+  //                     await bookCarProvider.cancelCarBooking(bookingId);
+  //                     print("Booking cancelled successfully!");
+
+  //                     // Update locally and trigger a rebuild
+  //                     var booking = bookCarProvider.bookList
+  //                         .firstWhere((b) => b.bookCarId == bookingId);
+  //                     booking.isCancelled = true;
+
+  //                     // Trigger a rebuild of the ListView
+  //                     bookCarProvider.notifyListeners();
+
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       SnackBar(
+  //                           content: Text("Booking cancelled successfully!")),
+  //                     );
+  //                     Navigator.of(context).pop();
+  //                   } catch (e) {
+  //                     print("Failed to cancel booking: $e");
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       SnackBar(content: Text("Failed to cancel booking: $e")),
+  //                     );
+  //                   }
+  //                 },
+  //                 child: Text('Yes'),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () {
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: Text('No'),
+  //               )
+  //             ]);
+  //       });
+  // }
 
   // deleteCarBookingShowDialog(
   //     BuildContext context, BookCarProvider bookCarProvider, String brandId) {

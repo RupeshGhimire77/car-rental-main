@@ -198,18 +198,18 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: Colors.white.withOpacity(.1)),
-                                child: IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      size: 35,
-                                      Icons.filter_list,
-                                      color: Colors.white,
-                                    )),
-                              )
+                              // Container(
+                              //   decoration: BoxDecoration(
+                              //       borderRadius: BorderRadius.circular(20),
+                              //       color: Colors.white.withOpacity(.1)),
+                              //   child: IconButton(
+                              //       onPressed: () {},
+                              //       icon: Icon(
+                              //         size: 35,
+                              //         Icons.filter_list,
+                              //         color: Colors.white,
+                              //       )),
+                              // )
                             ],
                           ),
                         ),
@@ -238,7 +238,7 @@ class _HomePageState extends State<HomePage> {
                                     )
                                   ],
                                 ),
-                                _buildBrandListUI(),
+                                _buildBrandListUI(), //Brands List UI
                                 Padding(
                                   padding:
                                       const EdgeInsets.only(top: 5, left: 20),
@@ -270,8 +270,10 @@ class _HomePageState extends State<HomePage> {
                                                 children: List.generate(
                                                     filteredCars.length,
                                                     (index) {
-                                                  return _buildCarCard(context,
-                                                      filteredCars[index]);
+                                                  return _buildCarCard(
+                                                      context,
+                                                      filteredCars[
+                                                          index]); // Cars GridView UI
                                                 })))))
                               ],
                             )),

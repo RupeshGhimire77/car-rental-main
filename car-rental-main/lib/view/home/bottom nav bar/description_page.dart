@@ -11,6 +11,7 @@ import 'package:flutter_application_1/shared/custom_book_textfield.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
 import 'package:flutter_application_1/shared/custom_textform.dart';
 import 'package:flutter_application_1/utils/helper.dart';
+import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nepali_date_picker/nepali_date_picker.dart';
 import 'package:provider/provider.dart';
@@ -26,23 +27,25 @@ class DescriptionPage extends StatefulWidget {
 
 class _DescriptionPageState extends State<DescriptionPage> {
   @override
-  TextEditingController emailController = TextEditingController();
+  // TextEditingController emailController = TextEditingController();
 
   void initState() {
-    if (widget.car != null) {
-      var provider = Provider.of<CarProvider>(context, listen: false);
-      provider.id = widget.car!.id ?? "";
-      provider.model = widget.car!.model ?? "";
-      provider.year = widget.car!.year ?? "";
-      provider.image = widget.car!.image ?? "";
-      provider.brand = widget.car!.brand ?? "";
-      provider.vehicalType = widget.car!.vehicleType ?? "";
-      provider.seatingCapacity = widget.car!.seatingCapacity ?? "";
-      provider.fuelType = widget.car!.fuelType ?? "";
-      provider.mileage = widget.car!.mileage ?? "";
-      provider.rentalPrice = widget.car!.rentalPrice ?? "";
-    }
-    super.initState();
+    // if (widget.car != null) {
+    //   // var provider = Provider.of<CarProvider>(context, listen: false);
+    //   var bookProvider = Provider.of<BookCarProvider>(context, listen: false);
+    //   // provider.id = widget.car!.id ?? "";
+    //   // provider.model = widget.car!.model ?? "";
+    //   // provider.year = widget.car!.year ?? "";
+    //   // provider.image = widget.car!.image ?? "";
+    //   // provider.brand = widget.car!.brand ?? "";
+    //   // provider.vehicalType = widget.car!.vehicleType ?? "";
+    //   // provider.seatingCapacity = widget.car!.seatingCapacity ?? "";
+    //   // provider.fuelType = widget.car!.fuelType ?? "";
+    //   // provider.mileage = widget.car!.mileage ?? "";
+    //   // provider.rentalPrice = widget.car!.rentalPrice ?? "";
+    //   bookProvider.carIdTextField?.text = widget.car?.id ?? "";
+
+    // }
     getValue();
     getCarData();
 
@@ -70,10 +73,11 @@ class _DescriptionPageState extends State<DescriptionPage> {
   getValue() {
     Future.delayed(Duration.zero, () async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var provider = Provider.of<BookCarProvider>(context, listen: false);
       setState(() {
         name = prefs.getString("name");
         email = prefs.getString("email");
-        emailController.text = email ?? "";
+
         role = prefs.getString("role");
       });
     });
@@ -100,84 +104,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
       mileage,
       rentalPrice;
 
-  final List<Map<String, List<String>>> places = [
-    {
-      'Dhulikhel': [
-        'Dhulikhel Bus Park',
-        'Bhaktapur Durbar Square',
-        'Dhulikhel Hospital',
-        'Kali Temple',
-        'Buddha Stupa',
-      ]
-    },
-    {
-      'Panauti': [
-        'Panauti Bus Park',
-        'Panauti Museum',
-        'Indreshwor Mahadev Temple',
-        'Brahmayani Temple',
-        'Panauti Heritage Area',
-      ]
-    },
-    {
-      'Banepa': [
-        'Banepa Bus Park',
-        'Bhimsen Temple',
-        'Banepa Durbar Square',
-        'Kankrej Bhanjyang',
-        'Khadgakot',
-      ]
-    },
-    {
-      'Kalaiya': [
-        'Kalaiya Market',
-        'Kalaiya Bus Park',
-      ]
-    },
-    {
-      'Nala': [
-        'Nala Bus Park',
-        'Nala Temple',
-      ]
-    },
-    {
-      'Namobuddha': [
-        'Namobuddha Monastery',
-        'Namobuddha Stupa',
-      ]
-    },
-    {
-      'Sankhu': [
-        'Sankhu Bus Park',
-        'Sankhu Durbar Square',
-        'Bajrayogini Temple',
-      ]
-    },
-    {
-      'Kavre': [
-        'Kavre Bus Park',
-        'Various local markets',
-      ]
-    },
-    {
-      'Bhakundebesi': [
-        'Bhakundebesi Market',
-        'Local temples and shrines',
-      ]
-    },
-  ];
-
-  // Flatten the list to get all place names
-  List<String> getAllPlaces() {
-    List<String> allPlaces = [];
-    for (var place in places) {
-      place.forEach((key, value) {
-        allPlaces.addAll(value); // Add all locations from each place
-      });
-    }
-    return allPlaces;
-  }
-
   File file = File("");
   String? downloadUrl;
 
@@ -185,7 +111,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> allPlaces = getAllPlaces();
+    List<String> allPlaces =
+        Provider.of<BookCarProvider>(context, listen: false).getAllPlaces();
     return Scaffold(
       backgroundColor: Color(0xff771616),
       appBar: AppBar(
@@ -231,7 +158,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                   width: MediaQuery.of(context).size.width * .9,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(carProvider.image!),
+                    child: Image.network(widget.car?.image ?? ''),
                   ),
                 ),
                 Container(
@@ -252,27 +179,12 @@ class _DescriptionPageState extends State<DescriptionPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Model: ${carProvider.model ?? ""}",
+                              "Model: ${widget.car?.model ?? ""}",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 20),
                             ),
                             Text(
-                              "Year: " + carProvider.year! ?? "",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Vehical Type: ${carProvider.vehicalType ?? ""}",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20),
-                            ),
-                            Text(
-                              "Fuel Type: ${carProvider.fuelType ?? ""}",
+                              "Year: ${widget.car?.year ?? ""}",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 20),
                             ),
@@ -282,12 +194,27 @@ class _DescriptionPageState extends State<DescriptionPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Seating Capacity: ${carProvider.seatingCapacity ?? ""}",
+                              "Vehical Type: ${widget.car?.vehicleType ?? ""}",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 20),
                             ),
                             Text(
-                              "Mileage: ${carProvider.mileage ?? ""}",
+                              "Fuel Type: ${widget.car?.fuelType ?? ""}",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Seating Capacity: ${widget.car?.seatingCapacity ?? ""}",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                            Text(
+                              "Mileage: ${widget.car?.mileage ?? ""}",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 20),
                             ),
@@ -298,7 +225,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                         //   style: TextStyle(color: Colors.white, fontSize: 20),
                         // ),
                         Text(
-                          "Brand: ${carProvider.brand ?? ""}",
+                          "Brand: ${widget.car?.brand ?? ""}",
                           style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
                         Container(
@@ -309,7 +236,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              "Rental Price: Rs. ${carProvider.rentalPrice ?? ""}/day",
+                              "Rental Price: Rs. ${widget.car?.rentalPrice ?? ""}/day",
                               style:
                                   TextStyle(color: Colors.yellow, fontSize: 30),
                             ),
@@ -324,7 +251,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   child: Container(
                     color: Color(0xff181A1B),
-                    height: MediaQuery.of(context).size.height * .68,
+                    height: MediaQuery.of(context).size.height * .8,
                     width: MediaQuery.of(context).size.width * .9,
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10, left: 15),
@@ -334,24 +261,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                 Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Visibility(
-                              visible: false,
-                              child: CustomBookTextfield(
-                                // labelText: "user email: ${email}",
-                                // initialValue: email ?? "",
-                                controller: emailController,
-                                // bookCarProvider.setCarId("${email}"),
-                              ),
-                            ),
-                            Visibility(
-                              visible: false,
-                              child: CustomBookTextfield(
-                                labelText: "Car Id",
-                                initialValue: widget.car!.id,
-                                controller: bookCarProvider
-                                    .setCarId("${widget.car!.id}"),
-                              ),
-                            ),
                             Text("Pick up Point",
                                 style: TextStyle(
                                     color: Color(0xffC3BEB6), fontSize: 16)),
@@ -652,7 +561,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                               ],
                             ),
                             CustomBookButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   if (bookCarProvider
                                           .pickUpPointController.text.isEmpty ||
                                       bookCarProvider
@@ -664,12 +573,13 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                       bookCarProvider
                                           .dropTimeController.text.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                           content: Text(
                                               'Please fill in all fields')),
                                     );
                                     return;
                                   }
+
                                   bookCarProvider
                                       .setStartDate(_startDateController.text);
                                   bookCarProvider
@@ -678,29 +588,23 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                       .pickUpTimeController.text);
                                   bookCarProvider.setDropTime(
                                       bookCarProvider.dropTimeController.text);
+                                  await bookCarProvider.saveBookCar(
+                                      email: email, id: widget.car?.id);
 
-                                  bookCarProvider
-                                      .setEmail(emailController.text);
-
-                                  // print(
-                                  //     "Pick Up Time: ${_pickUpTimeController.text}");
-                                  // print(
-                                  //     "Drop Time: ${_dropTimeController.text}");
-
-                                  // pickImage();
-                                  bookCarProvider.saveBookCar();
-                                  if (bookCarProvider.isSuccess) {
+                                  if (bookCarProvider.isSuccess &&
+                                      bookCarProvider.saveBookCarStatus ==
+                                          StatusUtil.success) {
                                     Helper.displaySnackBar(context,
                                         "Successfully Booked the car.");
-                                    setState(() {});
-                                  } else {
+                                    Navigator.pop(context);
+                                  } else if (bookCarProvider.isSuccess ==
+                                          false &&
+                                      bookCarProvider.saveBookCarStatus ==
+                                          StatusUtil.error) {
                                     Helper.displaySnackBar(
                                         context, "Couldn't book the car.");
                                   }
-                                  // print(
-                                  //     "Pick Up Time: ${_pickUpTimeController.text}");
-                                  // print(
-                                  //     "Drop Time: ${_dropTimeController.text}");
+
                                   setState(() {});
                                 },
                                 child:
@@ -900,7 +804,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
       var uploadReference = storageReference.child(fileName);
       await uploadReference.putFile(file);
       downloadUrl = await uploadReference.getDownloadURL();
-      print("downloadUrl: ${downloadUrl}");
 
       setState(() {
         downloadUrl; // Update downloadUrl for the form field
@@ -910,7 +813,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
       setState(() {
         loader = false; // Hide loader even on error
       });
-      print(e); // Print error for debugging
+      // Print error for debugging
     }
   }
 }
