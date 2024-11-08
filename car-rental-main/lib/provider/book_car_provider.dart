@@ -21,8 +21,8 @@ class BookCarProvider extends ChangeNotifier {
   TextEditingController dropTimeController = TextEditingController();
   TextEditingController bookCarImageController = TextEditingController();
 
-  TextEditingController? carIdTextField;
-  TextEditingController? emailTextField;
+  // TextEditingController? carIdTextField;
+  // TextEditingController? emailTextField;
 
   String? errorMessage;
 
@@ -219,7 +219,7 @@ class BookCarProvider extends ChangeNotifier {
         endDate: endDateController.text,
         pickUpTime: pickUpTimeController.text,
         dropTime: dropTimeController.text,
-        bookCarImage: bookCarImage!.text,
+        bookCarImage: bookCarImage?.text ?? "",
         carId: id,
         email: email,
         isCancelled: false);
@@ -236,31 +236,51 @@ class BookCarProvider extends ChangeNotifier {
   }
 
   Future<void> updateBookCar({String? email, String? carId}) async {
-    if (_updateBookingStatus != StatusUtil.loading) {
-      setUpdateBookingStatus(StatusUtil.loading);
-    }
+    try {
+      // print("Entering updateBookCar function");
 
-    BookCar bookCar = BookCar(
+      if (_updateBookingStatus != StatusUtil.loading) {
+        setUpdateBookingStatus(StatusUtil.loading);
+        // print("Status set to loading");
+      }
+
+      // Validate inputs
+      // if (bookCarId == null ||
+      //     pickUpPointController.text.isEmpty ||
+      //     startDateController.text.isEmpty ||
+      //     endDateController.text.isEmpty ||
+      //     pickUpTimeController.text.isEmpty ||
+      //     dropTimeController.text.isEmpty ||
+      //     bookCarImage!.text.isEmpty ||
+      //     email == null) {
+      //   print("One or more required fields are null or empty");
+      //   return;
+      // }
+
+      BookCar bookCar = BookCar(
         bookCarId: bookCarId,
         pickUpPoint: pickUpPointController.text,
-        // destinationPoint: destinationPointController!.text,
-        // destinationPoint: destinationPoint,
         startDate: startDateController.text,
         endDate: endDateController.text,
         pickUpTime: pickUpTimeController.text,
         dropTime: dropTimeController.text,
-        bookCarImage: bookCarImage!.text,
-        carId: carIdTextField?.text ?? '',
-        email: emailTextField?.text ?? '',
-        isCancelled: false);
+        bookCarImage: bookCarImage?.text ?? "",
+        carId: carId,
+        email: email,
+        isCancelled: false,
+      );
 
-    ApiResponse response = await bookCarService.updateBookingData(bookCar);
+      print("BookCar object created: ${bookCar.toJson()}");
 
-    if (response.statusUtil == StatusUtil.success) {
-      isSuccess = response.data;
-      setUpdateBookingStatus(StatusUtil.success);
-    } else if (response.statusUtil == StatusUtil.error) {
-      errorMessage = response.errorMessage;
+      ApiResponse response = await bookCarService.updateBookingData(bookCar);
+      if (response.statusUtil == StatusUtil.success) {
+        isSuccess = response.data;
+        setUpdateBookingStatus(StatusUtil.success);
+      } else {
+        errorMessage = response.errorMessage;
+        setUpdateBookingStatus(StatusUtil.error);
+      }
+    } catch (e) {
       setUpdateBookingStatus(StatusUtil.error);
     }
   }

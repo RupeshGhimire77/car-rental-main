@@ -86,13 +86,15 @@ class BookCarServiceImpl implements BookCarService {
 
   @override
   Future<ApiResponse> updateBookingData(BookCar bookCar) async {
+    bool isSuccess = false;
     try {
       await FirebaseFirestore.instance
           .collection("bookCar")
           .doc(bookCar.bookCarId)
-          .update(bookCar.toJson());
+          .update(bookCar.toJson())
+          .then((value) => isSuccess = true);
 
-      return ApiResponse(statusUtil: StatusUtil.success);
+      return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
     } catch (e) {
       return ApiResponse(
           statusUtil: StatusUtil.error, errorMessage: e.toString());

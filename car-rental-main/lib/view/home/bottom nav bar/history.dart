@@ -8,6 +8,7 @@ import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
+
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -392,10 +393,10 @@ class _HistoryState extends State<History> {
         children: [
           Expanded(
             child: CustomBookButton(
-              onPressed: () {
+              onPressed: () async {
                 // Handle edit details
                 // final String id = bookCarProvider.bookList[index].bookCarId!;
-                Navigator.push(
+                final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => EditBookingDetails(
@@ -403,6 +404,10 @@ class _HistoryState extends State<History> {
                         booking: booking,
                       ),
                     ));
+
+                if (result == true) {
+                  await bookCarProvider.getBookCar();
+                }
               },
               child: Text(
                 "Edit Details",
