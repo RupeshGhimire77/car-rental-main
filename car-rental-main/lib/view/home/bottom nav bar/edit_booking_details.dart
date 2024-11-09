@@ -83,9 +83,9 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
 
   @override
   void dispose() {
-    var provider = Provider.of<BookCarProvider>(context, listen: false)
-        .pickUpPointController
-        .dispose();
+    var provider = Provider.of<BookCarProvider>(context, listen: false);
+
+    provider.pickUpPointController.dispose();
     super.dispose();
   }
 
@@ -186,7 +186,6 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                             Text("Pick up Point",
                                 style: TextStyle(
                                     color: Color(0xffC3BEB6), fontSize: 16)),
-
                             Autocomplete<String>(
                               optionsBuilder:
                                   (TextEditingValue textEditingValue) {
@@ -226,7 +225,6 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                 );
                               },
                             ),
-
                             SizedBox(height: 20),
                             Text("Destination Point",
                                 style: TextStyle(
@@ -399,15 +397,15 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                         0.17,
                                     width:
                                         MediaQuery.of(context).size.width * 0.4,
-                                    child: bookCar!.bookCarImage != null
+                                    child: downloadUrl != null &&
+                                            downloadUrl!.isNotEmpty
                                         ? ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             child: FadeInImage(
                                               placeholder: AssetImage(
                                                   'assets/images/placeholder.png'),
-                                              image: NetworkImage(
-                                                  bookCar.bookCarImage!),
+                                              image: NetworkImage(downloadUrl!),
                                               height: MediaQuery.of(context)
                                                       .size
                                                       .height *
@@ -441,80 +439,107 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
                                               },
                                             ),
                                           )
-                                        : Container(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.2,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.6,
-                                            color: Colors.grey,
-                                            alignment: Alignment.center,
-                                            child: Text('No Image',
-                                                style: TextStyle(
-                                                    color: Colors.white)),
-                                          ),
+                                        : bookCar?.bookCarImage != null &&
+                                                bookCar!
+                                                    .bookCarImage!.isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: FadeInImage(
+                                                  placeholder: AssetImage(
+                                                      'assets/images/placeholder.png'),
+                                                  image: NetworkImage(
+                                                      bookCar.bookCarImage!),
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height *
+                                                      0.190,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.6,
+                                                  fit: BoxFit.cover,
+                                                  imageErrorBuilder: (context,
+                                                      error, stackTrace) {
+                                                    return Container(
+                                                      color: Colors.grey,
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height *
+                                                              0.2,
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.6,
+                                                      alignment:
+                                                          Alignment.center,
+                                                      child: Text(
+                                                        'Image Error',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontSize: 20.0,
+                                                            color:
+                                                                Colors.white),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              )
+                                            : Container(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.2,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.6,
+                                                color: Colors.grey,
+                                                alignment: Alignment.center,
+                                                child: Text('No Image',
+                                                    style: TextStyle(
+                                                        color: Colors.white)),
+                                              ),
                                   ),
                                 ),
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.only(left: 60),
                                     child: CustomBookButton(
-                                      onPressed: pickImage,
+                                      onPressed: () async {
+                                        await pickImage(); // Call the method to pick an image
+                                        setState(() {
+                                          // Update the UI after picking the image
+                                        });
+                                      },
                                       child: loader
                                           ? CircularProgressIndicator()
-                                          : Text("Upload Driving License",
+                                          : Text(
+                                              "Upload Driving License",
                                               style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 16)),
+                                                  fontSize: 16),
+                                            ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            // Add your submit button logic here
-                            if (downloadUrl != null)
+                            if (downloadUrl != null && downloadUrl!.isNotEmpty)
                               Visibility(
                                 visible: false,
                                 child: Expanded(
                                   child: CustomTextFormField(
                                     controller: bookCarProvider
-                                        .setBookCarImage(downloadUrl!),
-                                    initialValue: bookCar.bookCarImage,
-                                    // controller: bookCarImageController,
+                                        .setBookCarImage(downloadUrl),
+                                    // initialValue: bookCar?.bookCarImage,
                                     labelText: "License Image",
                                   ),
                                 ),
                               ),
-
-                            // CustomBookButton(
-                            //   onPressed: () async {
-                            //     if (_formKey.currentState!.validate()) {
-                            //       await bookCarProvider.updateBookCar(
-                            //         email: email,
-                            //         carId: widget.booking?.bookCarId,
-                            //       );
-
-                            //       if (bookCarProvider.isSuccess) {
-                            //         Helper.displaySnackBar(context,
-                            //             "Successfully updated the booking details.");
-                            //         Navigator.pop(context,
-                            //             true); // Pass success back to the previous screen
-                            //       } else {
-                            //         String error = bookCarProvider
-                            //                 .errorMessage ??
-                            //             "Couldn't update the booking details.";
-                            //         Helper.displaySnackBar(context, error);
-                            //       }
-                            //     }
-                            //   },
-                            //   child: loader
-                            //       ? CircularProgressIndicator()
-                            //       : Text("Change Booking Details"),
-                            // ),
-
                             CustomBookButton(
                                 onPressed: () async {
                                   print("Button pressed"); // Debug line
@@ -692,31 +717,6 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
     }
   }
 
-  // Future<void> pickImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? pickedFile =
-  //       await picker.pickImage(source: ImageSource.gallery);
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       file = File(pickedFile.path);
-  //       loader = true; // Start loader
-  //     });
-  //     try {
-  //       final ref = FirebaseStorage.instance
-  //           .ref()
-  //           .child('driving_licenses/${file!.path.split('/').last}');
-  //       await ref.putFile(file!);
-  //       downloadUrl = await ref.getDownloadURL(); // Store download URL
-  //     } catch (e) {
-  //       print("Error uploading image: $e");
-  //     } finally {
-  //       setState(() {
-  //         loader = false; // Stop loader
-  //       });
-  //     }
-  //   }
-  // }
-
   Future<void> pickImage() async {
     setState(() {
       loader = true; // Show loader before upload
@@ -732,15 +732,15 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
     }
 
     file = File(image.path);
-    // Optionally upload the image to Firebase Storage
-    // await uploadImageToFirebase(file);
+
+    // Upload the image to Firebase Storage
+    await uploadImageToFirebase(file!);
 
     setState(() {
       loader = false; // Hide loader after upload
     });
   }
 
-  // Optional: Function to upload the image to Firebase Storage
   Future<void> uploadImageToFirebase(File file) async {
     try {
       // Upload file to Firebase Storage
@@ -749,10 +749,51 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
           .child('driving_licenses/${file.path.split('/').last}');
       await storageRef.putFile(file);
       downloadUrl = await storageRef.getDownloadURL();
-      // Update your provider or state with the downloadUrl if needed
+      // Here you can update your provider or state with the new downloadUrl
+      // For example:
+      // bookCarProvider.setBookCarImage(downloadUrl);
     } catch (e) {
       // Handle any errors
       print("Error uploading image: $e");
     }
   }
+
+  // Future<void> pickImage() async {
+  //   setState(() {
+  //     loader = true; // Show loader before upload
+  //   });
+
+  //   final ImagePicker picker = ImagePicker();
+  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  //   if (image == null) {
+  //     setState(() {
+  //       loader = false; // Hide loader if user cancels
+  //     });
+  //     return;
+  //   }
+
+  //   file = File(image.path);
+  //   // Optionally upload the image to Firebase Storage
+  //   // await uploadImageToFirebase(file);
+
+  //   setState(() {
+  //     loader = false; // Hide loader after upload
+  //   });
+  // }
+
+  // // Optional: Function to upload the image to Firebase Storage
+  // Future<void> uploadImageToFirebase(File file) async {
+  //   try {
+  //     // Upload file to Firebase Storage
+  //     final storageRef = FirebaseStorage.instance
+  //         .ref()
+  //         .child('driving_licenses/${file.path.split('/').last}');
+  //     await storageRef.putFile(file);
+  //     downloadUrl = await storageRef.getDownloadURL();
+  //     // Update your provider or state with the downloadUrl if needed
+  //   } catch (e) {
+  //     // Handle any errors
+  //     print("Error uploading image: $e");
+  //   }
+  // }
 }

@@ -47,7 +47,9 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
     provider.model = car?.model ?? "";
     provider.year = car?.year ?? "";
 
-    provider.image = widget.car?.image ?? "";
+    provider.imageTextFieldController!.text = widget.car?.image ?? '';
+
+    // provider.image = widget.car?.image ?? "";
     provider.brand = car?.brand ?? "";
     provider.vehicalType = car?.vehicleType ?? "";
     provider.seatingCapacity = car?.seatingCapacity ?? "";
@@ -55,19 +57,19 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
     provider.mileage = car?.mileage ?? "";
     provider.rentalPrice = car?.rentalPrice ?? "";
 
-    carImageUpdateController.text = widget.car?.image ?? "";
+    // carImageUpdateController.text = widget.car?.image ?? "";
   }
 
   Future<void> getCarData() async {
     setState(() => isLoading = true);
     var provider = Provider.of<CarProvider>(context, listen: false);
-    await provider.getCar(); // Fetch the car list if needed
+    await provider.getCar(); // Fetching the car list
     setState(() => isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    var car = widget.car; // Get the car being edited
+    var car = widget.car; // Getting the car being edited
 
     return Scaffold(
         backgroundColor: Color(0xff771616),
@@ -103,13 +105,13 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            car?.image != null
+                            downloadUrl != null && downloadUrl!.isNotEmpty
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: FadeInImage(
                                       placeholder: AssetImage(
                                           'assets/images/placeholder.png'),
-                                      image: NetworkImage(car!.image!),
+                                      image: NetworkImage(downloadUrl!),
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.190,
@@ -140,21 +142,64 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
                                       },
                                     ),
                                   )
-                                : Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.2,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.6,
-                                    color: Colors.grey,
-                                    alignment: Alignment.center,
-                                    child: Text('No Image',
-                                        style: TextStyle(color: Colors.white)),
-                                  ),
+                                : car?.image != null && car!.image!.isNotEmpty
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: FadeInImage(
+                                          placeholder: AssetImage(
+                                              'assets/images/placeholder.png'),
+                                          image: NetworkImage(car.image!),
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.190,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.6,
+                                          fit: BoxFit.cover,
+                                          imageErrorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: Colors.grey,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.2,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.6,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                'Image Error',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    fontSize: 20.0,
+                                                    color: Colors.white),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Container(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.1905,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.6,
+                                        color: Colors.grey,
+                                        alignment: Alignment.center,
+                                        child: Text('No Image',
+                                            style:
+                                                TextStyle(color: Colors.white)),
+                                      ),
                           ],
                         ),
                       ),
                     ),
-                    // Other form fields here...
+
                     CustomButton(
                         onPressed: () {
                           pickImage();
@@ -167,11 +212,11 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
                                     color: Colors.white, fontSize: 20),
                               )),
 
-                    if (downloadUrl != null)
+                    if (downloadUrl != null && downloadUrl!.isNotEmpty)
                       Visibility(
-                        // visible: false,
+                        visible: true,
                         child: CustomTextFormField(
-                          initialValue: carProvider.imageTextField.toString(),
+                          // initialValue: carProvider.imageTextField.toString(),
                           controller: carProvider.setImage(downloadUrl!),
                           labelText: "Car Image",
                         ),

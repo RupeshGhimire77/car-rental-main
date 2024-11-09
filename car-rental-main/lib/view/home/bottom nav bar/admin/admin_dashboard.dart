@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/model/book_car.dart';
 import 'package:flutter_application_1/model/brand.dart';
 import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/model/user1.dart';
@@ -131,21 +132,21 @@ class AdminDashboardState extends State<AdminDashboard> {
   getCarData() async {
     setState(() => isLoading = true);
     var provider = Provider.of<CarProvider>(context, listen: false);
-    await provider.getCar(); // Ensure this updates the car list
+    await provider.getCar();
     setState(() => isLoading = false);
   }
 
   getBrandData() async {
     setState(() => isLoading = true);
     var provider = Provider.of<BrandProvider>(context, listen: false);
-    await provider.getBrand(); // Ensure this updates the car list
+    await provider.getBrand();
     setState(() => isLoading = false);
   }
 
   getBookingData() async {
     setState(() => isLoading = true);
     var provider = Provider.of<BookCarProvider>(context, listen: false);
-    await provider.getBookCar(); // Ensure this updates the car list
+    await provider.getBookCar();
     setState(() => isLoading = false);
   }
 
@@ -985,45 +986,52 @@ class AdminDashboardState extends State<AdminDashboard> {
                                         )
                                       ],
                                     ),
+                                    booking.isApproved == true
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 23, right: 4),
+                                            child: Text(
+                                              "Booking was Approved",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : booking.isCancelledByAdmin == true
+                                            ? Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 23, right: 4),
+                                                child: Text(
+                                                  "Booking was cancelled",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                            : booking.isCancelled == true
+                                                ? Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 23, right: 4),
+                                                    child: Text(
+                                                      "Booking was cancelled by user",
+                                                      style: TextStyle(
+                                                        color: Colors.red,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : _buildActionButtons(context,
+                                                    booking, bookCarProvider)
                                   ],
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 23, right: 4),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: CustomBookButton(
-                                              onPressed: () {},
-                                              child: Text(
-                                                "Cancel Booking",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 13,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )),
-                                        ),
-                                        Expanded(
-                                          child: CustomBookButton(
-                                              onPressed: () async {},
-                                              child: Text(
-                                                "Accept Booking",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 13,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              )),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              )
                             ],
                           ),
                         ],
@@ -1037,6 +1045,49 @@ class AdminDashboardState extends State<AdminDashboard> {
         ),
       );
     });
+  }
+
+  Widget _buildActionButtons(
+      BuildContext context, BookCar booking, BookCarProvider bookCarProvider) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 23, right: 4),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomBookButton(
+                    onPressed: () async {
+                      cancelCarBookingByAdminShowDialog(
+                          context, bookCarProvider, booking);
+                    },
+                    child: Text(
+                      "Cancel Booking",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+              Expanded(
+                child: CustomBookButton(
+                    onPressed: () async {
+                      approveCarBookingShowDialog(
+                          context, bookCarProvider, booking);
+                    },
+                    child: Text(
+                      "Approve Booking",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildCarCard(BuildContext context, Car car) {
@@ -1398,6 +1449,116 @@ class AdminDashboardState extends State<AdminDashboard> {
               },
               child: Text('No'),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  cancelCarBookingByAdminShowDialog(
+    BuildContext context,
+    BookCarProvider bookCarProvider,
+    BookCar booking,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cancel Booking'),
+          content: Text('Are you sure you want to cancel this booking?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  String bookingId = booking.bookCarId!;
+                  print("Attempting to cancel booking with ID: $bookingId");
+
+                  await bookCarProvider.cancelCarBookingByAdmin(bookingId);
+                  print("Booking cancelled successfully!");
+                  if (bookCarProvider.cancelCarBookingByAdminStatus ==
+                      StatusUtil.success) {
+                    Helper.displaySnackBar(
+                        context, "Booking cancelled successfully!");
+                    Navigator.of(context).pop();
+                  } else if (bookCarProvider.cancelCarBookingByAdminStatus ==
+                      StatusUtil.error) {
+                    Helper.displaySnackBar(context, "Failed to cancel booking");
+                  }
+
+                  // Update locally and trigger a rebuild
+                  booking.isCancelledByAdmin = true;
+                  bookCarProvider.notifyListeners();
+                  print(booking.isCancelledByAdmin);
+                } catch (e) {
+                  print("Failed to cancel booking: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to cancel booking: $e")),
+                  );
+                }
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  approveCarBookingShowDialog(
+    BuildContext context,
+    BookCarProvider bookCarProvider,
+    BookCar booking,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cancel Booking'),
+          content: Text('Are you sure you want to approve this booking?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  String bookingId = booking.bookCarId!;
+                  print("Attempting to approve booking with ID: $bookingId");
+
+                  await bookCarProvider.approveCarBooking(bookingId);
+                  print("Booking approved successfully!");
+                  if (bookCarProvider.approveCarBookingStatus ==
+                      StatusUtil.success) {
+                    Helper.displaySnackBar(
+                        context, "Booking approved successfully!");
+                    Navigator.of(context).pop();
+                  } else if (bookCarProvider.approveCarBookingStatus ==
+                      StatusUtil.error) {
+                    Helper.displaySnackBar(
+                        context, "Failed to approve booking");
+                  }
+
+                  // Update locally and trigger a rebuild
+                  // booking.isApproved = true;
+                  // bookCarProvider.notifyListeners();
+                } catch (e) {
+                  print("Failed to approved booking: $e");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Failed to approved booking: $e")),
+                  );
+                }
+              },
+              child: Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('No'),
+            )
           ],
         );
       },

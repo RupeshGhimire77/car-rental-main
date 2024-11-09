@@ -220,12 +220,13 @@ class _HistoryState extends State<History> {
                                   ),
                                 ),
                                 // do not show  buttons if clicked cancelled
-                                booking.isCancelled == true
+
+                                booking.isApproved == true
                                     ? Padding(
                                         padding: const EdgeInsets.only(
                                             left: 23, right: 4),
                                         child: Text(
-                                          "Cancelled By You",
+                                          "Your booking has been approved",
                                           style: TextStyle(
                                             color: Colors.red,
                                             fontSize: 16,
@@ -233,8 +234,34 @@ class _HistoryState extends State<History> {
                                           ),
                                         ),
                                       )
-                                    : _buildActionButtons(
-                                        context, booking, bookCarProvider)
+                                    : booking.isCancelled == true
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 23, right: 4),
+                                            child: Text(
+                                              "Booking was cancelled By You",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : booking.isCancelledByAdmin == true
+                                            ? Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 23, right: 4),
+                                                child: Text(
+                                                  "Your Booking was Cancelled",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                            : _buildActionButtons(context,
+                                                booking, bookCarProvider)
                               ],
                             ),
                           ],
@@ -545,46 +572,5 @@ class _HistoryState extends State<History> {
   //               )
   //             ]);
   //       });
-  // }
-
-  // deleteCarBookingShowDialog(
-  //     BuildContext context, BookCarProvider bookCarProvider, String brandId) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Cancel Booking'),
-  //         content: Text('Are you sure you want to cancel this booking?'),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () async {
-  //               // Update booking status in Firestore
-  //               await FirebaseFirestore.instance
-  //                   .collection("bookCar")
-  //                   .doc(brandId)
-  //                   .update({'isCancelled': true});
-
-  //               // Update locally
-  //               var booking = bookCarProvider.bookList
-  //                   .firstWhere((b) => b.bookCarId == brandId);
-  //               booking.isCancelled = true;
-
-  //               ScaffoldMessenger.of(context).showSnackBar(
-  //                 SnackBar(content: Text("Booking cancelled successfully!")),
-  //               );
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text('Yes'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: Text('No'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
   // }
 }

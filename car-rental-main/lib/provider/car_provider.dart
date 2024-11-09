@@ -19,6 +19,7 @@ class CarProvider extends ChangeNotifier {
   String? errorMessage = "";
   // String? id;
   TextEditingController? imageTextField;
+  TextEditingController? imageTextFieldController = TextEditingController();
   bool carDeleteSuccessfull = false;
 
   bool isSuccess = false;
@@ -115,7 +116,7 @@ class CarProvider extends ChangeNotifier {
         id: id,
         model: model,
         year: year,
-        image: imageTextField?.text,
+        image: imageTextField?.text ?? "",
         // image: image,
         vehicleType: vehicalType,
         fuelType: fuelType,
@@ -149,8 +150,7 @@ class CarProvider extends ChangeNotifier {
         id: id,
         model: model,
         year: year,
-        image: imageTextField?.text,
-        // image: image,
+        image: imageTextField?.text ?? "",
         vehicleType: vehicalType,
         fuelType: fuelType,
         mileage: mileage,

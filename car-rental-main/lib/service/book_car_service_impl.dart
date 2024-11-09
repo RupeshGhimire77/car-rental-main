@@ -85,6 +85,59 @@ class BookCarServiceImpl implements BookCarService {
   }
 
   @override
+  Future<ApiResponse> cancelBookingByAdmin(
+      String bookCarId, BookCar? bookcar) async {
+    bool isSuccess = false;
+
+    if (await Helper.isInternetConnectionAvailable()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("bookCar")
+            .doc(bookCarId)
+            .update({
+          'bookCarId': bookCarId,
+          'isCancelledByAdmin': true,
+        }).then((value) {
+          isSuccess = true;
+        });
+
+        return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
+      } catch (e) {
+        return ApiResponse(
+            statusUtil: StatusUtil.error, errorMessage: e.toString());
+      }
+    }
+    return ApiResponse(
+        statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
+  }
+
+  @override
+  Future<ApiResponse> approveBooking(String bookCarId, BookCar? bookcar) async {
+    bool isSuccess = false;
+
+    if (await Helper.isInternetConnectionAvailable()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("bookCar")
+            .doc(bookCarId)
+            .update({
+          'bookCarId': bookCarId,
+          'isApproved': true,
+        }).then((value) {
+          isSuccess = true;
+        });
+
+        return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
+      } catch (e) {
+        return ApiResponse(
+            statusUtil: StatusUtil.error, errorMessage: e.toString());
+      }
+    }
+    return ApiResponse(
+        statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
+  }
+
+  @override
   Future<ApiResponse> updateBookingData(BookCar bookCar) async {
     bool isSuccess = false;
     try {

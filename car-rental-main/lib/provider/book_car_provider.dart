@@ -13,6 +13,10 @@ class BookCarProvider extends ChangeNotifier {
 
   bool? isCancelled;
 
+  bool? isCancelledByAdmin;
+
+  bool? isApproved;
+
   TextEditingController pickUpPointController = TextEditingController();
   // TextEditingController? destinationPointController;
   TextEditingController startDateController = TextEditingController();
@@ -21,15 +25,14 @@ class BookCarProvider extends ChangeNotifier {
   TextEditingController dropTimeController = TextEditingController();
   TextEditingController bookCarImageController = TextEditingController();
 
-  // TextEditingController? carIdTextField;
-  // TextEditingController? emailTextField;
-
   String? errorMessage;
 
   TextEditingController? bookCarImage;
 
   bool isSuccess = false;
-  bool isDeleteBooking = false;
+  bool isCancelBooking = false;
+  bool isCancelByAdminBooking = false;
+  bool isApproveBooking = false;
 
   List<BookCar> bookList = [];
 
@@ -119,30 +122,18 @@ class BookCarProvider extends ChangeNotifier {
   StatusUtil _getBookCarStatus = StatusUtil.none;
   StatusUtil get getBookCarStatus => _getBookCarStatus;
 
-  StatusUtil _deleteCarBookingStatus = StatusUtil.none;
-  StatusUtil get deleteCarBookingStatus => _deleteCarBookingStatus;
+  StatusUtil _cancelCarBookingStatus = StatusUtil.none;
+  StatusUtil get cancelCarBookingStatus => _cancelCarBookingStatus;
+
+  StatusUtil _cancelCarBookingByAdminStatus = StatusUtil.none;
+  StatusUtil get cancelCarBookingByAdminStatus =>
+      _cancelCarBookingByAdminStatus;
+
+  StatusUtil _approveCarBookingStatus = StatusUtil.none;
+  StatusUtil get approveCarBookingStatus => _approveCarBookingStatus;
 
   StatusUtil _updateBookingStatus = StatusUtil.none;
   StatusUtil get updateBookingStatus => _updateBookingStatus;
-
-  // setEmail(value) {
-  //   emailTextField = TextEditingController(text: value);
-  // }
-
-  // setCarId(value) {
-  //   carIdTextField = TextEditingController(text: value);
-  // }
-
-  // setEmail(String value) {
-  //   emailTextField?.text = value;
-  //   notifyListeners();
-  //   print(emailTextField?.text);
-  // }
-
-  // setCarId(String value) {
-  //   carIdTextField?.text = value;
-  //   notifyListeners();
-  // }
 
   void setPickUpPoint(String value) {
     pickUpPointController.text = value;
@@ -176,11 +167,6 @@ class BookCarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // void setBookCarImage(String value) {
-  //   bookCarImageController.text = value;
-  //   notifyListeners();
-  // }
-
   setBookCarImage(value) {
     bookCarImage = TextEditingController(text: value);
   }
@@ -195,8 +181,18 @@ class BookCarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setGetDeleteCarBookingStatus(StatusUtil status) {
-    _deleteCarBookingStatus = status;
+  setCancelCarBookingStatus(StatusUtil status) {
+    _cancelCarBookingStatus = status;
+    notifyListeners();
+  }
+
+  setCancelCarBookingByAdminStatus(StatusUtil status) {
+    _cancelCarBookingByAdminStatus = status;
+    notifyListeners();
+  }
+
+  setApproveCarBookingStatus(StatusUtil status) {
+    _approveCarBookingStatus = status;
     notifyListeners();
   }
 
@@ -310,18 +306,51 @@ class BookCarProvider extends ChangeNotifier {
   }
 
   Future<void> cancelCarBooking(String bookId) async {
-    if (_deleteCarBookingStatus != StatusUtil.loading) {
-      setGetDeleteCarBookingStatus(StatusUtil.loading);
+    if (_cancelCarBookingStatus != StatusUtil.loading) {
+      setCancelCarBookingStatus(StatusUtil.loading);
     }
     BookCar bookCar = BookCar(isCancelled: true);
     ApiResponse response = await bookCarService.cancelBooking(bookId, bookCar);
     if (response.statusUtil == StatusUtil.success) {
-      isDeleteBooking = response.data;
+      isCancelBooking = response.data;
       getBookCar();
-      setGetDeleteCarBookingStatus(StatusUtil.success);
+      setCancelCarBookingStatus(StatusUtil.success);
     } else if (response.statusUtil == StatusUtil.error) {
       errorMessage = response.data;
-      setGetDeleteCarBookingStatus(StatusUtil.error);
+      setCancelCarBookingStatus(StatusUtil.error);
+    }
+  }
+
+  Future<void> cancelCarBookingByAdmin(String bookId) async {
+    if (_cancelCarBookingByAdminStatus != StatusUtil.loading) {
+      setCancelCarBookingByAdminStatus(StatusUtil.loading);
+    }
+    BookCar bookCar = BookCar(isCancelledByAdmin: true);
+    ApiResponse response =
+        await bookCarService.cancelBookingByAdmin(bookId, bookCar);
+    if (response.statusUtil == StatusUtil.success) {
+      isCancelByAdminBooking = response.data;
+      getBookCar();
+      setCancelCarBookingByAdminStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.data;
+      setCancelCarBookingByAdminStatus(StatusUtil.error);
+    }
+  }
+
+  Future<void> approveCarBooking(String bookId) async {
+    if (_approveCarBookingStatus != StatusUtil.loading) {
+      setApproveCarBookingStatus(StatusUtil.loading);
+    }
+    BookCar bookCar = BookCar(isApproved: true);
+    ApiResponse response = await bookCarService.approveBooking(bookId, bookCar);
+    if (response.statusUtil == StatusUtil.success) {
+      isApproveBooking = response.data;
+      getBookCar();
+      setApproveCarBookingStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.data;
+      setApproveCarBookingStatus(StatusUtil.error);
     }
   }
 }
