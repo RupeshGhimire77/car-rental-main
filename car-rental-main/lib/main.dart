@@ -6,11 +6,13 @@ import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/user_edit.dart';
+import 'package:flutter_application_1/utils/string_const.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/admin_bottom.navbar.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
-import 'package:flutter_application_1/view/home/bottom%20nav%20bar/khalti_payment.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/payment.dart';
 import 'package:flutter_application_1/view/home/bottom_navbar.dart';
 import 'package:flutter_application_1/view/home/user%20login/login.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +21,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await _setup();
   runApp(const MyApp());
+}
+
+Future<void> _setup() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = stripePublishableKey;
 }
 
 class MyApp extends StatefulWidget {
@@ -64,9 +72,9 @@ class _MyAppState extends State<MyApp> {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        // home: isUserLoggedIn ? BottomNavBar() : Login(),
-        home: KhaltiExampleApp(),
-        // home: EditBookingDetails(),
+        home: isUserLoggedIn ? BottomNavBar() : Login(),
+
+        // home: Payment(),
       ),
     );
   }

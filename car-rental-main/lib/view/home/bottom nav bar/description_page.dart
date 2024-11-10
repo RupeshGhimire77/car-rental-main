@@ -6,6 +6,7 @@ import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
+import 'package:flutter_application_1/service/stripe_service.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/shared/custom_book_textfield.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
@@ -561,33 +562,42 @@ class _DescriptionPageState extends State<DescriptionPage> {
                               ],
                             ),
                             CustomBookButton(
-                                onPressed: () async {
-                                  if (bookCarProvider
-                                          .pickUpPointController.text.isEmpty ||
-                                      bookCarProvider
-                                          .startDateController.text.isEmpty ||
-                                      bookCarProvider
-                                          .endDateController.text.isEmpty ||
-                                      bookCarProvider
-                                          .pickUpTimeController.text.isEmpty ||
-                                      bookCarProvider
-                                          .dropTimeController.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Please fill in all fields')),
-                                    );
-                                    return;
-                                  }
+                              onPressed: () async {
+                                if (bookCarProvider
+                                        .pickUpPointController.text.isEmpty ||
+                                    bookCarProvider
+                                        .startDateController.text.isEmpty ||
+                                    bookCarProvider
+                                        .endDateController.text.isEmpty ||
+                                    bookCarProvider
+                                        .pickUpTimeController.text.isEmpty ||
+                                    bookCarProvider
+                                        .dropTimeController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text('Please fill in all fields')),
+                                  );
+                                  return;
+                                }
 
-                                  bookCarProvider
-                                      .setStartDate(_startDateController.text);
-                                  bookCarProvider
-                                      .setEndDate(_endDateController.text);
-                                  bookCarProvider.setPickUpTime(bookCarProvider
-                                      .pickUpTimeController.text);
-                                  bookCarProvider.setDropTime(
-                                      bookCarProvider.dropTimeController.text);
+                                // Set booking details in the provider before payment
+                                bookCarProvider
+                                    .setStartDate(_startDateController.text);
+                                bookCarProvider
+                                    .setEndDate(_endDateController.text);
+                                bookCarProvider.setPickUpTime(
+                                    bookCarProvider.pickUpTimeController.text);
+                                bookCarProvider.setDropTime(
+                                    bookCarProvider.dropTimeController.text);
+
+                                // Show the payment UI first
+                                final paymentSuccessful = await StripeService
+                                    .instance
+                                    .makePayment(context, widget.car!, email!);
+
+                                // Only proceed to save booking if payment was successful
+                                if (paymentSuccessful) {
                                   await bookCarProvider.saveBookCar(
                                       email: email, id: widget.car?.id);
 
@@ -597,24 +607,23 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                     Helper.displaySnackBar(context,
                                         "Successfully Booked the car.");
                                     Navigator.pop(context);
-                                  } else if (bookCarProvider.isSuccess ==
-                                          false &&
-                                      bookCarProvider.saveBookCarStatus ==
-                                          StatusUtil.error) {
+                                  } else {
                                     Helper.displaySnackBar(
                                         context, "Couldn't book the car.");
                                   }
+                                } else {
+                                  Helper.displaySnackBar(context,
+                                      "Payment failed. Booking was not saved.");
+                                }
 
-                                  setState(() {});
-                                },
-                                child:
-                                    // loader == true
-                                    // ? CircularProgressIndicator():
-                                    Text(
-                                  "Book Now",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 20),
-                                ))
+                                setState(() {});
+                              },
+                              child: Text(
+                                "Book Now",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
+                            )
                           ],
                         ),
                       ),

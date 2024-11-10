@@ -50,3 +50,8 @@ String fuelTypeStr = "Fuel Type";
 
 String mileageStr = "Mileage";
 String rentalPriceStr = "Rental Price";
+
+const String stripePublishableKey =
+    "pk_test_51NvMzbEATQjX3V8ZQvnvuQTFBR2cpUHEMgpZIFu7GTLK9Ffg98ztaU0HC9Cb9xM0OKDzxzlKL0FpvGmsSFtZgpRx00b1imeSa9";
+const String stripeSecretKey =
+    "sk_test_51NvMzbEATQjX3V8ZgGDKgXqGxWMcLLbhFRfmZYS4n6N8GEnGCJ4yBFqIEdBuJl9zyFM7PxcjNPGNuS8rVvH1qmYD00sE9mDwAt";

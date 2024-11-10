@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"rentcar-3fc38","appId":"1:873547403429:android:faf03b14ccc49803533d4c","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"rentcar-3fc38","configurations":{"android":"1:873547403429:android:faf03b14ccc49803533d4c","ios":"1:873547403429:ios:592be35c43ec0b08533d4c","macos":"1:873547403429:ios:aac2e496f7aeb64c533d4c","web":"1:873547403429:web:8bf2f5039cf4f33f533d4c","windows":"1:873547403429:web:dd9b4d82bb33973f533d4c"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "rentcar-3fc38",
+          "appId": "1:873547403429:android:faf03b14ccc49803533d4c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "rentcar-3fc38",
+          "configurations": {
+            "android": "1:873547403429:android:faf03b14ccc49803533d4c",
+            "ios": "1:873547403429:ios:592be35c43ec0b08533d4c",
+            "macos": "1:873547403429:ios:aac2e496f7aeb64c533d4c",
+            "web": "1:873547403429:web:8bf2f5039cf4f33f533d4c",
+            "windows": "1:873547403429:web:dd9b4d82bb33973f533d4c"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}

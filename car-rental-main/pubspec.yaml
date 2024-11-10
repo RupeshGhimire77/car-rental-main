@@ -47,8 +47,10 @@ dependencies:
   flutter_otp_text_field: ^1.2.0
   shimmer: ^3.0.0
   nepali_date_picker: ^6.0.1
-  khalti: ^2.0.0
+  
   url_launcher: ^6.3.1
+  flutter_stripe: ^11.2.0
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
