@@ -12,6 +12,8 @@ class BookCar {
   bool? isCancelledByAdmin;
   bool? isApproved;
 
+  bool? isPaid;
+
   String? email;
 
   String? carId;
@@ -28,7 +30,8 @@ class BookCar {
       this.email,
       this.isCancelled = false,
       this.isCancelledByAdmin = false,
-      this.isApproved = false});
+      this.isApproved = false,
+      this.isPaid = false});
 
   BookCar.fromJson(Map<String, dynamic> json) {
     bookCarId = json['bookCarId'];
@@ -46,6 +49,8 @@ class BookCar {
     isCancelled = json['isCancelled'] ?? false;
     isCancelledByAdmin = json['isCancelledByAdmin'] ?? false;
     isApproved = json['isApproved'] ?? false;
+
+    isPaid = json['isPaid'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
@@ -65,6 +70,8 @@ class BookCar {
     data['isCancelled'] = this.isCancelled;
     data['isCancelledByAdmin'] = this.isCancelledByAdmin;
     data['isApproved'] = this.isApproved;
+
+    data['isPaid'] = this.isPaid;
     return data;
   }
 }

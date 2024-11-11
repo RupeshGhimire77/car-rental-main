@@ -17,6 +17,8 @@ class BookCarProvider extends ChangeNotifier {
 
   bool? isApproved;
 
+  bool? isPaid;
+
   TextEditingController pickUpPointController = TextEditingController();
   // TextEditingController? destinationPointController;
   TextEditingController startDateController = TextEditingController();
@@ -33,6 +35,7 @@ class BookCarProvider extends ChangeNotifier {
   bool isCancelBooking = false;
   bool isCancelByAdminBooking = false;
   bool isApproveBooking = false;
+  bool isPaidBooking = false;
 
   List<BookCar> bookList = [];
 
@@ -132,6 +135,9 @@ class BookCarProvider extends ChangeNotifier {
   StatusUtil _approveCarBookingStatus = StatusUtil.none;
   StatusUtil get approveCarBookingStatus => _approveCarBookingStatus;
 
+  StatusUtil _isPaidBookingStatus = StatusUtil.none;
+  StatusUtil get isPaidBookingStatus => _isPaidBookingStatus;
+
   StatusUtil _updateBookingStatus = StatusUtil.none;
   StatusUtil get updateBookingStatus => _updateBookingStatus;
 
@@ -193,6 +199,11 @@ class BookCarProvider extends ChangeNotifier {
 
   setApproveCarBookingStatus(StatusUtil status) {
     _approveCarBookingStatus = status;
+    notifyListeners();
+  }
+
+  setIsPaidBookingStatus(StatusUtil status) {
+    _isPaidBookingStatus = status;
     notifyListeners();
   }
 
@@ -351,6 +362,22 @@ class BookCarProvider extends ChangeNotifier {
     } else if (response.statusUtil == StatusUtil.error) {
       errorMessage = response.data;
       setApproveCarBookingStatus(StatusUtil.error);
+    }
+  }
+
+  Future<void> isPaidCarBooking(String bookId) async {
+    if (_isPaidBookingStatus != StatusUtil.loading) {
+      setIsPaidBookingStatus(StatusUtil.loading);
+    }
+    BookCar bookCar = BookCar(isPaid: true);
+    ApiResponse response = await bookCarService.isPaidBooking(bookId, bookCar);
+    if (response.statusUtil == StatusUtil.success) {
+      isPaidBooking = response.data;
+      getBookCar();
+      setIsPaidBookingStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.data;
+      setIsPaidBookingStatus(StatusUtil.error);
     }
   }
 }

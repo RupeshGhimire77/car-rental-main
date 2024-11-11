@@ -15,23 +15,25 @@ class CustomTextFormField extends StatelessWidget {
   final Color? fillColor;
   final void Function(String)? onChanged;
   final List<TextInputFormatter>? inputFormatters;
+  bool readOnly;
 
-  CustomTextFormField({
-    Key? key,
-    this.initialValue,
-    this.hintText,
-    this.controller,
-    this.obscureText = false,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.labelText,
-    this.keyboardType,
-    this.validator,
-    this.fillColor,
-    this.inputFormatters,
-    this.onChanged,
-    this.textCapitalization = TextCapitalization.none,
-  }) : super(key: key);
+  CustomTextFormField(
+      {Key? key,
+      this.initialValue,
+      this.hintText,
+      this.controller,
+      this.obscureText = false,
+      this.prefixIcon,
+      this.suffixIcon,
+      this.labelText,
+      this.keyboardType,
+      this.validator,
+      this.fillColor,
+      this.inputFormatters,
+      this.onChanged,
+      this.textCapitalization = TextCapitalization.none,
+      this.readOnly = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,7 @@ class CustomTextFormField extends StatelessWidget {
           onChanged: onChanged,
           inputFormatters: inputFormatters,
           autovalidateMode: AutovalidateMode.onUserInteraction,
+          readOnly: readOnly,
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,

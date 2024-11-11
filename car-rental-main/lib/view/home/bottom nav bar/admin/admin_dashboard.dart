@@ -986,12 +986,12 @@ class AdminDashboardState extends State<AdminDashboard> {
                                         )
                                       ],
                                     ),
-                                    booking.isApproved == true
+                                    booking.isPaid == true
                                         ? Padding(
                                             padding: const EdgeInsets.only(
                                                 left: 23, right: 4),
                                             child: Text(
-                                              "Booking was Approved",
+                                              "Payment has been done for this car.",
                                               style: TextStyle(
                                                 color: Colors.red,
                                                 fontSize: 16,
@@ -999,12 +999,12 @@ class AdminDashboardState extends State<AdminDashboard> {
                                               ),
                                             ),
                                           )
-                                        : booking.isCancelledByAdmin == true
+                                        : booking.isApproved == true
                                             ? Padding(
                                                 padding: const EdgeInsets.only(
                                                     left: 23, right: 4),
                                                 child: Text(
-                                                  "Booking was cancelled",
+                                                  "Booking was Approved",
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontSize: 16,
@@ -1012,13 +1012,13 @@ class AdminDashboardState extends State<AdminDashboard> {
                                                   ),
                                                 ),
                                               )
-                                            : booking.isCancelled == true
+                                            : booking.isCancelledByAdmin == true
                                                 ? Padding(
                                                     padding:
                                                         const EdgeInsets.only(
                                                             left: 23, right: 4),
                                                     child: Text(
-                                                      "Booking was cancelled by user",
+                                                      "Booking was cancelled",
                                                       style: TextStyle(
                                                         color: Colors.red,
                                                         fontSize: 16,
@@ -1027,8 +1027,27 @@ class AdminDashboardState extends State<AdminDashboard> {
                                                       ),
                                                     ),
                                                   )
-                                                : _buildActionButtons(context,
-                                                    booking, bookCarProvider)
+                                                : booking.isCancelled == true
+                                                    ? Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 23,
+                                                                right: 4),
+                                                        child: Text(
+                                                          "Booking was cancelled by user",
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : _buildActionButtons(
+                                                        context,
+                                                        booking,
+                                                        bookCarProvider)
                                   ],
                                 ),
                               ),

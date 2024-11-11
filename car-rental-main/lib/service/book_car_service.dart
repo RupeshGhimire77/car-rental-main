@@ -7,5 +7,7 @@ abstract class BookCarService {
   Future<ApiResponse> cancelBooking(String bookId, BookCar bookCar);
   Future<ApiResponse> cancelBookingByAdmin(String bookId, BookCar bookCar);
   Future<ApiResponse> approveBooking(String bookId, BookCar bookCar);
+  Future<ApiResponse> isPaidBooking(String bookId, BookCar bookCar);
+
   Future<ApiResponse> updateBookingData(BookCar bookCar);
 }

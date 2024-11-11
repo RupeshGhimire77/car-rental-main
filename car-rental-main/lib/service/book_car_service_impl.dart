@@ -138,6 +138,28 @@ class BookCarServiceImpl implements BookCarService {
   }
 
   @override
+  Future<ApiResponse> isPaidBooking(String bookCarId, BookCar? bookcar) async {
+    if (await Helper.isInternetConnectionAvailable()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("bookCar")
+            .doc(bookCarId)
+            .update({
+          'bookCarId': bookCarId,
+          'isPaid': true,
+        });
+
+        return ApiResponse(statusUtil: StatusUtil.success, data: true);
+      } catch (e) {
+        return ApiResponse(
+            statusUtil: StatusUtil.error, errorMessage: e.toString());
+      }
+    }
+    return ApiResponse(
+        statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
+  }
+
+  @override
   Future<ApiResponse> updateBookingData(BookCar bookCar) async {
     bool isSuccess = false;
     try {

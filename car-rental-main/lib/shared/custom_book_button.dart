@@ -8,7 +8,8 @@ class CustomBookButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 20, left: 0, right: 20, bottom: 10),
+      // padding: const EdgeInsets.only(left: 0, right: 20, bottom: 10),
+      padding: const EdgeInsets.only(left: 0, right: 10, bottom: 10),
       child: Center(
         child: Container(
             width: MediaQuery.of(context).size.width,

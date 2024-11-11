@@ -5,11 +5,14 @@ import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
+import 'package:flutter_application_1/service/stripe_service.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
+import 'package:flutter_application_1/utils/helper.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
+import 'package:nepali_date_picker/nepali_date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -216,17 +219,28 @@ class _HistoryState extends State<History> {
                                           ),
                                         ],
                                       ),
+                                      Row(
+                                        children: [
+                                          Text("Rental Period: "),
+                                          Text(
+                                            "${rentalPeriod(booking.startDate!, booking.endDate!)} days",
+                                            style: TextStyle(
+                                              color: Colors.redAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
                                 // do not show  buttons if clicked cancelled
-
-                                booking.isApproved == true
+                                booking.isPaid == true
                                     ? Padding(
                                         padding: const EdgeInsets.only(
                                             left: 23, right: 4),
                                         child: Text(
-                                          "Your booking has been approved",
+                                          "You Have Already Paid for this Rental Car.",
                                           style: TextStyle(
                                             color: Colors.red,
                                             fontSize: 16,
@@ -234,25 +248,78 @@ class _HistoryState extends State<History> {
                                           ),
                                         ),
                                       )
-                                    : booking.isCancelled == true
+                                    : booking.isApproved == true
                                         ? Padding(
                                             padding: const EdgeInsets.only(
-                                                left: 23, right: 4),
-                                            child: Text(
-                                              "Booking was cancelled By You",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                                top: 5, left: 24, right: 4),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  "Your booking has been approved.",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "Please Pay the required amount.",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                CustomBookButton(
+                                                  onPressed: () async {
+                                                    final successPayment =
+                                                        await StripeService
+                                                            .instance
+                                                            .makePayment(
+                                                                context,
+                                                                booking,
+                                                                carDetails
+                                                                    .rentalPrice!,
+                                                                email!);
+
+                                                    if (successPayment) {
+                                                      bookCarProvider
+                                                          .isPaidCarBooking(
+                                                              booking
+                                                                  .bookCarId!);
+                                                    } else {
+                                                      await Helper
+                                                          .displaySnackBar(
+                                                              context,
+                                                              "Payment Failed.");
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    "Booking Payment",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "Note: Only after payment will your rental car be delivered to you.",
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           )
-                                        : booking.isCancelledByAdmin == true
+                                        : booking.isCancelled == true
                                             ? Padding(
                                                 padding: const EdgeInsets.only(
                                                     left: 23, right: 4),
                                                 child: Text(
-                                                  "Your Booking was Cancelled",
+                                                  "Booking was cancelled By You",
                                                   style: TextStyle(
                                                     color: Colors.red,
                                                     fontSize: 16,
@@ -260,8 +327,23 @@ class _HistoryState extends State<History> {
                                                   ),
                                                 ),
                                               )
-                                            : _buildActionButtons(context,
-                                                booking, bookCarProvider)
+                                            : booking.isCancelledByAdmin == true
+                                                ? Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 23, right: 4),
+                                                    child: Text(
+                                                      "Your Booking was Cancelled",
+                                                      style: TextStyle(
+                                                        color: Colors.red,
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : _buildActionButtons(context,
+                                                    booking, bookCarProvider)
                               ],
                             ),
                           ],
@@ -518,59 +600,13 @@ class _HistoryState extends State<History> {
     );
   }
 
-  // cancelCarBookingShowDialog(
-  //   BuildContext context,
-  //   BookCarProvider bookCarProvider,
-  //   String bookingId,
-  // ) {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //             title: Text('Cancel Booking'),
-  //             content: Text('Are you sure you want to cancel this booking?'),
-  //             actions: [
-  //               TextButton(
-  //                 onPressed: () async {
-  //                   try {
-  //                     print("Attempting to update booking with ID: $bookingId");
-  //                     // await FirebaseFirestore.instance
-  //                     //     .collection("bookCar")
-  //                     //     .doc(bookingId)
-  //                     //     .update({'isCancelled': true});
+  int rentalPeriod(String startDate, String endDate) {
+    // Parsing the start and end dates
+    NepaliDateTime start = NepaliDateTime.parse(startDate);
+    NepaliDateTime end = NepaliDateTime.parse(endDate);
 
-  //                     await bookCarProvider.cancelCarBooking(bookingId);
-  //                     print("Booking cancelled successfully!");
-
-  //                     // Update locally and trigger a rebuild
-  //                     var booking = bookCarProvider.bookList
-  //                         .firstWhere((b) => b.bookCarId == bookingId);
-  //                     booking.isCancelled = true;
-
-  //                     // Trigger a rebuild of the ListView
-  //                     bookCarProvider.notifyListeners();
-
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(
-  //                           content: Text("Booking cancelled successfully!")),
-  //                     );
-  //                     Navigator.of(context).pop();
-  //                   } catch (e) {
-  //                     print("Failed to cancel booking: $e");
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text("Failed to cancel booking: $e")),
-  //                     );
-  //                   }
-  //                 },
-  //                 child: Text('Yes'),
-  //               ),
-  //               TextButton(
-  //                 onPressed: () {
-  //                   Navigator.of(context).pop();
-  //                 },
-  //                 child: Text('No'),
-  //               )
-  //             ]);
-  //       });
-  // }
+    // Calculating the difference in days
+    int totalRentalDays = end.difference(start).inDays;
+    return totalRentalDays;
+  }
 }
