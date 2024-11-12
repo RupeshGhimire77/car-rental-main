@@ -7,6 +7,7 @@ import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/utils/string_const.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/admin_bottom.navbar.dart';
 import 'package:flutter_application_1/view/home/bottom_navbar.dart';
+import 'package:flutter_application_1/view/home/user%20login/mobile_no_otp.dart';
 import 'package:flutter_application_1/view/home/user%20login/sign_up.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -141,11 +142,11 @@ class _LoginState extends State<Login> {
                         padding: const EdgeInsets.only(right: 10),
                         child: TextButton(
                           onPressed: () {
-                            //  Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //       builder: (context) => MobileNoOTP(),
-                            //     )),
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MobileNoOTP(),
+                                ));
                           },
                           child: Text(
                             forgotPasswordStr,

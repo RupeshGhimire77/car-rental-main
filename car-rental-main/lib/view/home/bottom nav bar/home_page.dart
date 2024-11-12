@@ -38,7 +38,24 @@ class _HomePageState extends State<HomePage> {
 
   String? name, email, role;
 
-  void _filteredCars(String query) {
+  // void _filteredCars(String query) {
+  //   final carProvider = Provider.of<CarProvider>(context, listen: false);
+  //   List<Car> results = [];
+
+  //   if (query.isEmpty) {
+  //     results = carProvider.carList;
+  //   } else {
+  //     results = carProvider.carList
+  //         .where(
+  //             (car) => car.model!.toLowerCase().contains(query.toLowerCase()))
+  //         .toList();
+  //   }
+  //   setState(() {
+  //     filteredCars = results;
+  //   });
+  // }
+
+  void _filteredCars(String query) async {
     final carProvider = Provider.of<CarProvider>(context, listen: false);
     List<Car> results = [];
 
@@ -49,6 +66,12 @@ class _HomePageState extends State<HomePage> {
           .where(
               (car) => car.model!.toLowerCase().contains(query.toLowerCase()))
           .toList();
+
+      if (results.isNotEmpty) {
+        // Save the brand of the first matching car to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('lastSearchedBrand', results.first.brand ?? '');
+      }
     }
     setState(() {
       filteredCars = results;
@@ -61,13 +84,6 @@ class _HomePageState extends State<HomePage> {
       name = prefs.getString("name");
       email = prefs.getString("email");
       role = prefs.getString("role");
-
-      // var provider = Provider.of<CarProvider>(context, listen: false);
-      // await provider.getCar();
-
-      // setState(() {
-      //   // user = User1(email: email, name: name, role: role);
-      // });
     });
   }
 
@@ -81,15 +97,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // getCarData() async {
+  //   Future.delayed(
+  //     Duration.zero,
+  //     () async {
+  //       var provider = Provider.of<CarProvider>(context, listen: false);
+  //       await provider.getCar();
+
+  //       setState(() {
+  //         filteredCars = provider.carList;
+  //       });
+  //     },
+  //   );
+  // }
+
   getCarData() async {
     Future.delayed(
       Duration.zero,
       () async {
+        final prefs = await SharedPreferences.getInstance();
+        final lastSearchedBrand = prefs.getString('lastSearchedBrand');
+
         var provider = Provider.of<CarProvider>(context, listen: false);
         await provider.getCar();
 
+        // Prioritize cars with the last-searched brand
+        List<Car> sortedCars = provider.carList;
+        if (lastSearchedBrand != null && lastSearchedBrand.isNotEmpty) {
+          sortedCars.sort((a, b) {
+            if (a.brand == lastSearchedBrand && b.brand != lastSearchedBrand) {
+              return -1;
+            } else if (a.brand != lastSearchedBrand &&
+                b.brand == lastSearchedBrand) {
+              return 1;
+            }
+            return 0;
+          });
+        }
+
         setState(() {
-          filteredCars = provider.carList;
+          filteredCars = sortedCars;
         });
       },
     );
@@ -152,134 +199,107 @@ class _HomePageState extends State<HomePage> {
               )
             ],
           ),
-          body: SingleChildScrollView(
-            child: Consumer<CarProvider>(
-              builder: (context, carProvider, child) => carProvider
-                          .getCarStatus ==
-                      StatusUtil.loading
-                  ? Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 30),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * .6,
-                            child: ClipRect(
-                              child: Image.asset(
-                                "assets/images/redcar1.png",
-                              ),
+          body: Consumer<CarProvider>(
+            builder: (context, carProvider, child) => carProvider
+                        .getCarStatus ==
+                    StatusUtil.loading
+                ? Center(child: CircularProgressIndicator())
+                : ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * .6,
+                          height: MediaQuery.of(context).size.width * .4,
+                          child: ClipRect(
+                            child: Image.asset(
+                              "assets/images/redcar1.png",
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 20, right: 20, bottom: 10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal:
-                                          12), // Padding inside the search bar
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(
-                                        .8), // Background color for the search bar
-                                    borderRadius: BorderRadius.circular(
-                                        30), // Rounded corners
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20, right: 20, bottom: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(.8),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Search...",
+                                    border: InputBorder.none,
+                                    icon: Icon(Icons.search),
                                   ),
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      hintText: "Search...", // Placeholder text
-                                      border:
-                                          InputBorder.none, // Remove underline
-                                      icon: Icon(Icons.search), // Search icon
-                                    ),
-                                    onChanged: _filteredCars,
-                                  ),
+                                  onChanged: _filteredCars,
                                 ),
                               ),
-                              // Container(
-                              //   decoration: BoxDecoration(
-                              //       borderRadius: BorderRadius.circular(20),
-                              //       color: Colors.white.withOpacity(.1)),
-                              //   child: IconButton(
-                              //       onPressed: () {},
-                              //       icon: Icon(
-                              //         size: 35,
-                              //         Icons.filter_list,
-                              //         color: Colors.white,
-                              //       )),
-                              // )
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Container(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20)),
-                                color: Colors.brown[900]),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 20, top: 5),
-                                      child: Text(
-                                        "Brands",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    )
-                                  ],
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                          color: Colors.brown[900],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20, top: 5),
+                              child: Text(
+                                "Brands",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                _buildBrandListUI(), //Brands List UI
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 5, left: 20),
-                                  child: Text(
-                                    "Cars",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                              ),
+                            ),
+                            _buildBrandListUI(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5, left: 20),
+                              child: Text(
+                                "Cars",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                Expanded(
-                                    child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 10),
-                                        child: SizedBox(
-                                            height: MediaQuery.of(context)
-                                                .size
-                                                .height,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: GridView.count(
-                                                crossAxisCount: 2,
-                                                mainAxisSpacing: 4,
-                                                crossAxisSpacing: 1,
-                                                scrollDirection: Axis.vertical,
-                                                physics: ScrollPhysics(),
-                                                children: List.generate(
-                                                    filteredCars.length,
-                                                    (index) {
-                                                  return _buildCarCard(
-                                                      context,
-                                                      filteredCars[
-                                                          index]); // Cars GridView UI
-                                                })))))
-                              ],
-                            )),
-                      ],
-                    ),
-            ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 10),
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 4,
+                                  crossAxisSpacing: 1,
+                                ),
+                                itemCount: filteredCars.length,
+                                itemBuilder: (context, index) {
+                                  return _buildCarCard(
+                                      context, filteredCars[index]);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
           )),
     );
   }

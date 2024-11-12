@@ -119,9 +119,9 @@ class StripeService {
       // Calculate for first 3 days at full price
       int totalPrice = 3 * dailyRate;
 
-      // Starting discount from the 4th day
       double discount = 5;
 
+      // Starting discount from the 4th day
       for (int day = 4; day <= rentalDays; day++) {
         // Apply discount to the daily rate
         double discountedRate = dailyRate * (1 - discount / 100);
