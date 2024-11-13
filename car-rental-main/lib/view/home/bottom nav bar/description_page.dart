@@ -30,22 +30,34 @@ class DescriptionPage extends StatefulWidget {
 }
 
 class _DescriptionPageState extends State<DescriptionPage> {
+  double averageRating = 0.0;
+  int numberOfRatings = 0;
   @override
   // TextEditingController emailController = TextEditingController();
 
   void initState() {
     getValue();
     getCarData();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   var provider = Provider.of<RatingProvider>(context, listen: false);
+    //   provider.loadUserRating(
+    //       widget.car!.id!, email!); // Ensure this is called once on load
+    // });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ratingProvider =
-          Provider.of<RatingProvider>(context, listen: false);
-      ratingProvider.calculateAverageRating1(widget.car!.id!);
-      ratingProvider.loadUserRating(widget.car!.id!, email!);
-    });
-
+    _fetchCarRating();
     _selectedStartDate = NepaliDateTime.now();
     _startDateController.text = _formatNepaliDate(_selectedStartDate!);
+  }
+
+  Future<void> _fetchCarRating() async {
+    final ratingProvider = Provider.of<RatingProvider>(context, listen: false);
+    Map<String, dynamic> ratingDetails =
+        await ratingProvider.getCarRatingDetails(widget.car!.id!);
+
+    setState(() {
+      averageRating = ratingDetails['averageRating'];
+      numberOfRatings = ratingDetails['numberOfRatings'];
+    });
   }
 
   TextEditingController _startDateController = TextEditingController();
@@ -634,6 +646,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
                   ),
                   Consumer<RatingProvider>(
                     builder: (context, ratingProvider, child) {
+                      ratingProvider.loadUserRating(widget.car!.id!,
+                          email!); // Ensure this is called once on load
                       return ratingProvider.isRated == true
                           ? Column(
                               children: [
@@ -666,10 +680,10 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                       width: 10,
                                     ),
                                     Text(
-                                      "(${ratingProvider.averageRating}/5)",
+                                      "(${averageRating.toStringAsFixed(1)}/5) $numberOfRatings",
                                       style: TextStyle(
                                           color: Colors.white, fontSize: 18),
-                                    ),
+                                    )
                                   ],
                                 ),
                               ],
@@ -700,19 +714,34 @@ class _DescriptionPageState extends State<DescriptionPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          RatingBar.builder(
-            initialRating: 3,
-            minRating: 1,
-            direction: Axis.horizontal,
-            allowHalfRating: true,
-            itemCount: 5,
-            itemBuilder: (context, _) => Icon(
-              Icons.star,
-              color: Colors.amber,
-            ),
-            onRatingUpdate: (rating) {
-              ratingProvider.setRating(rating.toString());
-            },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              RatingBar.builder(
+                initialRating: 3,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  ratingProvider.setRating(rating.toString());
+                },
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                "(${averageRating.toStringAsFixed(1)}/5) $numberOfRatings",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              )
+            ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -725,6 +754,13 @@ class _DescriptionPageState extends State<DescriptionPage> {
                   );
                   if (ratingProvider.saveRatingStatus == StatusUtil.success) {
                     Helper.displaySnackBar(context, "Rating Successful!");
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DescriptionPage(),
+                      ),
+                      (route) => false,
+                    );h
                   } else if (ratingProvider.saveRatingStatus ==
                       StatusUtil.error) {
                     Helper.displaySnackBar(context,

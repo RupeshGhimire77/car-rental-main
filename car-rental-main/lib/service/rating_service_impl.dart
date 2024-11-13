@@ -34,4 +34,26 @@ class RatingServiceImpl implements RatingService {
           statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
     }
   }
+
+  // Future<ApiResponse> saveRating(Rating rating) async {
+  //   if (await Helper.isInternetConnectionAvailable()) {
+  //     try {
+  //       DocumentReference docRef = await FirebaseFirestore.instance
+  //           .collection("ratings")
+  //           .add(rating.toJson());
+
+  //       rating.ratingId = docRef.id; // Set document ID as rating ID
+  //       await docRef.update({'ratingId': rating.ratingId});
+
+  //       return ApiResponse(statusUtil: StatusUtil.success, data: true);
+  //     } catch (e) {
+  //       return ApiResponse(
+  //           statusUtil: StatusUtil.error, errorMessage: e.toString());
+  //     }
+  //   } else {
+  //     return ApiResponse(
+  //         statusUtil: StatusUtil.error,
+  //         errorMessage: "No internet connection.");
+  //   }
+  // }
 }

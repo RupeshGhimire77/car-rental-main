@@ -3,7 +3,6 @@ import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
-import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
@@ -200,109 +199,107 @@ class _HomePageState extends State<HomePage> {
               )
             ],
           ),
-          body: Consumer2<CarProvider, RatingProvider>(
-            builder: (context, carProvider, ratingProvider, child) =>
-                carProvider.getCarStatus == StatusUtil.loading
-                    ? Center(child: CircularProgressIndicator())
-                    : ListView(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 30),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * .6,
-                              height: MediaQuery.of(context).size.width * .4,
-                              child: ClipRect(
-                                child: Image.asset(
-                                  "assets/images/redcar1.png",
+          body: Consumer<CarProvider>(
+            builder: (context, carProvider, child) => carProvider
+                        .getCarStatus ==
+                    StatusUtil.loading
+                ? Center(child: CircularProgressIndicator())
+                : ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * .6,
+                          height: MediaQuery.of(context).size.width * .4,
+                          child: ClipRect(
+                            child: Image.asset(
+                              "assets/images/redcar1.png",
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20, right: 20, bottom: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(.8),
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: "Search...",
+                                    border: InputBorder.none,
+                                    icon: Icon(Icons.search),
+                                  ),
+                                  onChanged: _filteredCars,
                                 ),
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                left: 20, right: 20, bottom: 10),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(.8),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        hintText: "Search...",
-                                        border: InputBorder.none,
-                                        icon: Icon(Icons.search),
-                                      ),
-                                      onChanged: _filteredCars,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20)),
-                              color: Colors.brown[900],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 20, top: 5),
-                                  child: Text(
-                                    "Brands",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                _buildBrandListUI(),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 5, left: 20),
-                                  child: Text(
-                                    "Cars",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 10),
-                                  child: GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisSpacing: 4,
-                                      crossAxisSpacing: 1,
-                                    ),
-                                    itemCount: filteredCars.length,
-                                    itemBuilder: (context, index) {
-                                      return _buildCarCard(context,
-                                          filteredCars[index], ratingProvider);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                          color: Colors.brown[900],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 20, top: 5),
+                              child: Text(
+                                "Brands",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            _buildBrandListUI(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5, left: 20),
+                              child: Text(
+                                "Cars",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 10),
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 4,
+                                  crossAxisSpacing: 1,
+                                ),
+                                itemCount: filteredCars.length,
+                                itemBuilder: (context, index) {
+                                  return _buildCarCard(
+                                      context, filteredCars[index]);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
           )),
     );
   }
@@ -396,12 +393,10 @@ Widget _buildBrandListUI() {
   );
 }
 
-Widget _buildCarCard(
-    BuildContext context, Car car, RatingProvider ratingProvider) {
-  ratingProvider.calculateAverageRating(car.id!);
+Widget _buildCarCard(BuildContext context, Car car) {
   return SizedBox(
-    // height: 300,
-    // width: 300,
+    height: 300,
+    width: 300,
     child: GestureDetector(
       onTap: () async {
         // await carProvider.getCarDetails();
@@ -414,93 +409,83 @@ Widget _buildCarCard(
             ));
       },
       child: Card(
-        child:
-            Consumer<RatingProvider>(builder: (context, ratingProvider, child) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              car.image != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadiusDirectional.only(
-                          topEnd: Radius.circular(10),
-                          topStart: Radius.circular(10)),
-                      child: FadeInImage(
-                        placeholder:
-                            AssetImage('assets/images/placeholder.png'),
-                        image: NetworkImage(car.image!),
-                        height: 120,
-                        width: 180,
-                        fit: BoxFit.cover,
-                        imageErrorBuilder: (context, error, stackTrace) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.red,
-                            highlightColor: Colors.yellow,
-                            child: Container(
-                              color: Colors.grey,
-                              height: 120,
-                              width: 180,
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Image Error',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  color: Colors.white,
-                                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            car.image != null
+                ? ClipRRect(
+                    borderRadius: BorderRadiusDirectional.only(
+                        topEnd: Radius.circular(10),
+                        topStart: Radius.circular(10)),
+                    child: FadeInImage(
+                      placeholder: AssetImage(
+                          'assets/images/placeholder.png'), // Use an asset image placeholder or use `Shimmer` widget here
+                      image: NetworkImage(car.image!),
+                      height: 120,
+                      width: 180,
+                      fit: BoxFit.cover,
+                      imageErrorBuilder: (context, error, stackTrace) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.red,
+                          highlightColor: Colors.yellow,
+                          child: Container(
+                            color: Colors.grey,
+                            height: 120,
+                            width: 180,
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Image Error',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                color: Colors.white,
                               ),
                             ),
-                          );
-                        },
-                        placeholderErrorBuilder: (context, error, stackTrace) {
-                          return Shimmer.fromColors(
-                            baseColor: Colors.deepPurple[300]!,
-                            highlightColor: Colors.deepPurple[100]!,
-                            child: Container(
-                              color: Colors.white,
-                              height: 120,
-                              width: 180,
-                              alignment: Alignment.center,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : Shimmer.fromColors(
-                      baseColor: Colors.red,
-                      highlightColor: Colors.yellow,
-                      child: Container(
-                        height: 120,
-                        width: 180,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Shimmer',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 40.0,
-                            fontWeight: FontWeight.bold,
                           ),
+                        );
+                      },
+                      placeholderErrorBuilder: (context, error, stackTrace) {
+                        return Shimmer.fromColors(
+                          baseColor: Colors.deepPurple[300]!,
+                          highlightColor: Colors.deepPurple[100]!,
+                          child: Container(
+                            color: Colors.white,
+                            height: 120,
+                            width: 180,
+                            alignment: Alignment.center,
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : Shimmer.fromColors(
+                    baseColor: Colors.red,
+                    highlightColor: Colors.yellow,
+                    child: Container(
+                      height: 120,
+                      width: 180,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Shimmer',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 40.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-              SizedBox(height: 5),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(
-                  "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5)",
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(car.model!),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text("Rs. " + car.rentalPrice! + "/day"),
-              )
-            ],
-          );
-        }),
+                  ),
+            SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text(car.model!),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Text("Rs. " + car.rentalPrice! + "/day"),
+            )
+          ],
+        ),
       ),
     ),
   );

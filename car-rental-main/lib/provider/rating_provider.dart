@@ -12,11 +12,6 @@ class RatingProvider extends ChangeNotifier {
 
   bool? isRated;
 
-  double? averageRating;
-
-  Map<String, List<double>> carRatings = {};
-  Map<String, List<double>> ratingList = {};
-
   RatingService ratingService = RatingServiceImpl();
 
   TextEditingController ratingController = TextEditingController();
@@ -60,36 +55,41 @@ class RatingProvider extends ChangeNotifier {
     }
 
     // Check if this user has already rated this car
-    QuerySnapshot existingRatingSnapshot = await FirebaseFirestore.instance
-        .collection("rating")
-        .where("carId", isEqualTo: id)
-        .where("email", isEqualTo: email)
-        .get();
+    try {
+      QuerySnapshot existingRatingSnapshot = await FirebaseFirestore.instance
+          .collection("rating")
+          .where("carId", isEqualTo: id)
+          .where("email", isEqualTo: email)
+          .get();
 
-    if (existingRatingSnapshot.docs.isNotEmpty) {
-      // If a rating already exists, prevent re-rating and show a message
-      setSaveRatingStatus(StatusUtil.success);
-      errorMessage = "You have already rated this car.";
-      notifyListeners();
-      return;
-    }
+      if (existingRatingSnapshot.docs.isNotEmpty) {
+        // If a rating already exists, prevent re-rating and show a message
+        setSaveRatingStatus(StatusUtil.success);
+        errorMessage = "You have already rated this car.";
+        notifyListeners();
+        return;
+      }
 
-    // If no previous rating, save the new rating
-    Rating rateCar = Rating(
-      ratingId: ratingId,
-      rating: ratingController.text,
-      carId: id,
-      email: email,
-    );
+      // If no previous rating, save the new rating
+      Rating rateCar = Rating(
+        ratingId: ratingId,
+        rating: ratingController.text,
+        carId: id,
+        email: email,
+      );
 
-    ApiResponse response = await ratingService.saveRating(rateCar);
+      ApiResponse response = await ratingService.saveRating(rateCar);
 
-    if (response.statusUtil == StatusUtil.success) {
-      isSuccess = response.data;
-      isRated = true;
-      setSaveRatingStatus(StatusUtil.success);
-    } else if (response.statusUtil == StatusUtil.error) {
-      errorMessage = response.errorMessage;
+      if (response.statusUtil == StatusUtil.success) {
+        isSuccess = response.data;
+        isRated = true;
+        setSaveRatingStatus(StatusUtil.success);
+      } else if (response.statusUtil == StatusUtil.error) {
+        errorMessage = response.errorMessage;
+        setSaveRatingStatus(StatusUtil.error);
+      }
+    } catch (e) {
+      errorMessage = "an  error occurred: $e";
       setSaveRatingStatus(StatusUtil.error);
     }
   }
@@ -115,56 +115,41 @@ class RatingProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> calculateAverageRating1(String carId) async {
+  Future<Map<String, dynamic>> getCarRatingDetails(String carId) async {
     try {
-      QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection("rating")
           .where("carId", isEqualTo: carId)
           .get();
 
-      if (ratingSnapshot.docs.isNotEmpty) {
-        // Calculate the sum of ratings
-        double totalRating = 0;
-        for (var doc in ratingSnapshot.docs) {
-          var data = doc.data() as Map<String, dynamic>;
-          totalRating += double.parse(data["rating"]);
-        }
-
-        // Calculate average
-        averageRating = totalRating / ratingSnapshot.docs.length;
-      } else {
-        averageRating = 0; // No ratings found, default to 0
+      if (snapshot.docs.isEmpty) {
+        return {
+          'averageRating': 0.0,
+          'numberOfRatings': 0,
+        };
       }
 
-      notifyListeners();
-    } catch (e) {
-      averageRating = null; // Handle any errors
-      print("Error calculating average rating: $e");
-    }
-  }
+      double totalRating = 0.0;
+      int numberOfRatings = snapshot.docs.length;
 
-  Future<void> calculateAverageRating(String carId) async {
-    try {
-      QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
-          .collection("rating")
-          .where("carId", isEqualTo: carId)
-          .get();
-
-      if (ratingSnapshot.docs.isNotEmpty) {
-        double totalRating = 0;
-        for (var doc in ratingSnapshot.docs) {
-          var data = doc.data() as Map<String, dynamic>;
-          totalRating += double.parse(data["rating"]);
-        }
-        double average = totalRating / ratingSnapshot.docs.length;
-        ratingList[carId] = [average]; // Store in the list using carId as key
-      } else {
-        ratingList[carId] = [0.0]; // Default to 0 if no ratings found
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        totalRating += double.tryParse(data["rating"]) ?? 0.0;
       }
 
-      notifyListeners();
+      double averageRating = totalRating / numberOfRatings;
+
+      return {
+        'averageRating': averageRating,
+        'numberOfRatings': numberOfRatings,
+      };
     } catch (e) {
-      print("Error calculating average rating: $e");
+      // Handle any errors here
+      print("Error fetching car ratings: $e");
+      return {
+        'averageRating': 0.0,
+        'numberOfRatings': 0,
+      };
     }
   }
 
