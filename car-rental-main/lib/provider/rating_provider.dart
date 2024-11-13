@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/api_response.dart';
 import 'package:flutter_application_1/model/rating.dart';
@@ -6,8 +7,10 @@ import 'package:flutter_application_1/service/rating_service_impl.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 
 class RatingProvider extends ChangeNotifier {
-  String? carId, email;
+  String? carId, email, ratingId;
   String? errorMessage;
+
+  bool? isRated;
 
   RatingService ratingService = RatingServiceImpl();
 
@@ -17,6 +20,16 @@ class RatingProvider extends ChangeNotifier {
   StatusUtil get saveRatingStatus => _saveRatingStatus;
 
   bool isSuccess = false;
+
+  // bool? isCarRated = false;
+
+  StatusUtil _isCarRatedStatus = StatusUtil.none;
+  StatusUtil get isCarRatedStatus => _isCarRatedStatus;
+
+  setSaveIsCarRatedStatus(StatusUtil status) {
+    _isCarRatedStatus = status;
+    notifyListeners();
+  }
 
   setCarId(value) {
     carId = value;
@@ -41,7 +54,24 @@ class RatingProvider extends ChangeNotifier {
       setSaveRatingStatus(StatusUtil.loading);
     }
 
+    // Check if this user has already rated this car
+    QuerySnapshot existingRatingSnapshot = await FirebaseFirestore.instance
+        .collection("rating")
+        .where("carId", isEqualTo: id)
+        .where("email", isEqualTo: email)
+        .get();
+
+    if (existingRatingSnapshot.docs.isNotEmpty) {
+      // If a rating already exists, prevent re-rating and show a message
+      setSaveRatingStatus(StatusUtil.success);
+      errorMessage = "You have already rated this car.";
+      notifyListeners();
+      return;
+    }
+
+    // If no previous rating, save the new rating
     Rating rateCar = Rating(
+      ratingId: ratingId,
       rating: ratingController.text,
       carId: id,
       email: email,
@@ -51,10 +81,55 @@ class RatingProvider extends ChangeNotifier {
 
     if (response.statusUtil == StatusUtil.success) {
       isSuccess = response.data;
+      isRated = true;
       setSaveRatingStatus(StatusUtil.success);
     } else if (response.statusUtil == StatusUtil.error) {
       errorMessage = response.errorMessage;
       setSaveRatingStatus(StatusUtil.error);
     }
   }
+
+  void loadUserRating(String carId, String email) async {
+    _isCarRatedStatus = StatusUtil.loading;
+    notifyListeners();
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("rating")
+        .where("carId", isEqualTo: carId)
+        .where("email", isEqualTo: email)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      var userRating = snapshot.docs.first.data() as Map<String, dynamic>;
+      ratingController.text = userRating["rating"];
+      isRated = true;
+      setSaveIsCarRatedStatus(StatusUtil.success);
+    } else {
+      isRated = false;
+      setSaveIsCarRatedStatus(StatusUtil.none);
+    }
+  }
+
+  // Future<void> saveRating({String? id, String? email}) async {
+  //   if (_saveRatingStatus != StatusUtil.loading) {
+  //     setSaveRatingStatus(StatusUtil.loading);
+  //   }
+
+  //   Rating rateCar = Rating(
+  //     ratingId: ratingId,
+  //     rating: ratingController.text,
+  //     carId: id,
+  //     email: email,
+  //   );
+
+  //   ApiResponse response = await ratingService.saveRating(rateCar);
+
+  //   if (response.statusUtil == StatusUtil.success) {
+  //     isSuccess = response.data;
+  //     setSaveRatingStatus(StatusUtil.success);
+  //   } else if (response.statusUtil == StatusUtil.error) {
+  //     errorMessage = response.errorMessage;
+  //     setSaveRatingStatus(StatusUtil.error);
+  //   }
+  // }
 }

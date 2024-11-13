@@ -13,14 +13,17 @@ class RatingServiceImpl implements RatingService {
 
     if (await Helper.isInternetConnectionAvailable()) {
       try {
-        await FirebaseFirestore.instance
+        DocumentReference docRef = await FirebaseFirestore.instance
             .collection("rating")
-            .add(rating.toJson())
-            .then(
-          (value) {
-            isSuccess = true;
-          },
-        );
+            .add(rating.toJson());
+
+        // Set bookCarId to the generated ID
+        rating.ratingId = docRef.id;
+
+        // Update the document with the new bookCarId field
+        await docRef.update({'ratingId': rating.ratingId});
+
+        isSuccess = true;
         return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
       } catch (e) {
         return ApiResponse(

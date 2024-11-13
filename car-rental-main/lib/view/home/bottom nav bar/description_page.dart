@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/car.dart';
@@ -625,90 +626,239 @@ class _DescriptionPageState extends State<DescriptionPage> {
                     ),
                   ),
                   Consumer<RatingProvider>(
-                      builder: (context, ratingProvider, child) => Container(
-                            width: MediaQuery.of(context).size.width * .9,
-                            height: MediaQuery.of(context).size.height * .22,
-                            color: Colors.white.withOpacity(0.14),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "Rate This Car",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold),
+                    builder: (context, ratingProvider, child) {
+                      ratingProvider.loadUserRating(widget.car!.id!,
+                          email!); // Ensure this is called once on load
+
+                      return ratingProvider.isRated == true
+                          ? Column(
+                              children: [
+                                Text(
+                                  "You have rated this car:",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
                                   ),
-                                  RatingBar.builder(
-                                    initialRating: 3,
-                                    minRating: 1,
-                                    direction: Axis.horizontal,
-                                    allowHalfRating: true,
-                                    itemCount: 5,
-                                    itemPadding:
-                                        EdgeInsets.symmetric(horizontal: 4.0),
-                                    itemBuilder: (context, _) => Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                    ),
-                                    onRatingUpdate: (rating) {
-                                      // Update the ratingProvider directly
-                                      ratingProvider
-                                          .setRating(rating.toString());
-                                    },
+                                ),
+                                RatingBar.builder(
+                                  initialRating: double.parse(
+                                      ratingProvider.ratingController.text),
+                                  minRating: 1,
+                                  direction: Axis.horizontal,
+                                  allowHalfRating: true,
+                                  itemCount: 5,
+                                  itemBuilder: (context, _) => Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 40, vertical: 10),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: CustomBookButton(
-                                            onPressed: () async {
-                                              if (_formKey.currentState!
-                                                  .validate()) {
-                                                await ratingProvider.saveRating(
-                                                    email: email,
-                                                    id: widget.car?.id);
-                                                if (ratingProvider
-                                                        .saveRatingStatus ==
-                                                    StatusUtil.success) {
-                                                  Helper.displaySnackBar(
-                                                      context,
-                                                      "Rating Successful!");
-                                                } else if (ratingProvider
-                                                        .saveRatingStatus ==
-                                                    StatusUtil.error) {
-                                                  Helper.displaySnackBar(
-                                                      context,
-                                                      "Error rating the car.");
-                                                }
-                                              }
-                                            },
-                                            child: Text(
-                                              "Rate It",
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ))
+                                  onRatingUpdate: (_) {},
+                                  ignoreGestures: true,
+                                ),
+                              ],
+                            )
+                          : _buildRatingForm(ratingProvider);
+                    },
+                  ),
+                  // Consumer<RatingProvider>(
+                  //   builder: (context, ratingProvider, child) {
+                  //     return FutureBuilder<QuerySnapshot>(
+                  //       future: FirebaseFirestore.instance
+                  //           .collection("rating")
+                  //           .where("carId", isEqualTo: widget.car?.id)
+                  //           .where("email",
+                  //               isEqualTo: email) // Filter by user's email
+                  //           .get(),
+                  //       builder: (context, snapshot) {
+                  //         if (snapshot.connectionState ==
+                  //             ConnectionState.waiting) {
+                  //           return CircularProgressIndicator();
+                  //         }
+
+                  //         // Check if user has already rated this car
+                  //         if (snapshot.hasData &&
+                  //             snapshot.data!.docs.isNotEmpty) {
+                  //           var userRating = snapshot.data!.docs.first.data()
+                  //               as Map<String, dynamic>;
+                  //           return Column(
+                  //             children: [
+                  //               Text(
+                  //                 "You have rated this car:",
+                  //                 style: TextStyle(
+                  //                   color: Colors.white,
+                  //                   fontWeight: FontWeight.bold,
+                  //                   fontSize: 24,
+                  //                 ),
+                  //               ),
+                  //               RatingBar.builder(
+                  //                 initialRating:
+                  //                     double.parse(userRating["rating"]),
+                  //                 minRating: 1,
+                  //                 direction: Axis.horizontal,
+                  //                 allowHalfRating: true,
+                  //                 itemCount: 5,
+                  //                 itemPadding:
+                  //                     EdgeInsets.symmetric(horizontal: 4.0),
+                  //                 itemBuilder: (context, _) => Icon(
+                  //                   Icons.star,
+                  //                   color: Colors.amber,
+                  //                 ),
+                  //                 onRatingUpdate: (_) {},
+                  //                 ignoreGestures: true,
+                  //               ),
+                  //             ],
+                  //           );
+                  //         } else {
+                  //           return Form(
+                  //             key: _formKey,
+                  //             child: Column(
+                  //               children: [
+                  //                 Text(
+                  //                   "Rate This Car",
+                  //                   style: TextStyle(
+                  //                     color: Colors.white,
+                  //                     fontSize: 24,
+                  //                     fontWeight: FontWeight.bold,
+                  //                   ),
+                  //                 ),
+                  //                 RatingBar.builder(
+                  //                   initialRating: 3,
+                  //                   minRating: 1,
+                  //                   direction: Axis.horizontal,
+                  //                   allowHalfRating: true,
+                  //                   itemCount: 5,
+                  //                   itemPadding:
+                  //                       EdgeInsets.symmetric(horizontal: 4.0),
+                  //                   itemBuilder: (context, _) => Icon(
+                  //                     Icons.star,
+                  //                     color: Colors.amber,
+                  //                   ),
+                  //                   onRatingUpdate: (rating) {
+                  //                     ratingProvider
+                  //                         .setRating(rating.toString());
+                  //                   },
+                  //                 ),
+                  //                 Padding(
+                  //                   padding: const EdgeInsets.symmetric(
+                  //                       horizontal: 40, vertical: 10),
+                  //                   child: Row(
+                  //                     mainAxisAlignment:
+                  //                         MainAxisAlignment.center,
+                  //                     children: [
+                  //                       Expanded(
+                  //                         child: CustomBookButton(
+                  //                           onPressed: () async {
+                  //                             if (_formKey.currentState!
+                  //                                 .validate()) {
+                  //                               await ratingProvider.saveRating(
+                  //                                   email: email,
+                  //                                   id: widget.car?.id);
+                  //                               if (ratingProvider
+                  //                                       .saveRatingStatus ==
+                  //                                   StatusUtil.success) {
+                  //                                 Helper.displaySnackBar(
+                  //                                     context,
+                  //                                     "Rating Successful!");
+                  //                               } else if (ratingProvider
+                  //                                       .saveRatingStatus ==
+                  //                                   StatusUtil.error) {
+                  //                                 Helper.displaySnackBar(
+                  //                                     context,
+                  //                                     ratingProvider
+                  //                                             .errorMessage ??
+                  //                                         "Error rating the car.");
+                  //                               }
+                  //                             }
+                  //                           },
+                  //                           child: Text(
+                  //                             "Rate It",
+                  //                             style: TextStyle(
+                  //                               fontSize: 16,
+                  //                               color: Colors.white,
+                  //                               fontWeight: FontWeight.bold,
+                  //                             ),
+                  //                           ),
+                  //                         ),
+                  //                       )
+                  //                     ],
+                  //                   ),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           );
+                  //         }
+                  //       },
+                  //     );
+                  //   },
+                  // ),
+                  SizedBox(
+                    height: 10,
+                  )
                 ],
               ),
             ),
           ),
         ));
+  }
+
+  Widget _buildRatingForm(RatingProvider ratingProvider) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Text(
+            "Rate This Car",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          RatingBar.builder(
+            initialRating: 3,
+            minRating: 1,
+            direction: Axis.horizontal,
+            allowHalfRating: true,
+            itemCount: 5,
+            itemBuilder: (context, _) => Icon(
+              Icons.star,
+              color: Colors.amber,
+            ),
+            onRatingUpdate: (rating) {
+              ratingProvider.setRating(rating.toString());
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+            child: CustomBookButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  await ratingProvider.saveRating(
+                    email: email,
+                    id: widget.car?.id,
+                  );
+                  if (ratingProvider.saveRatingStatus == StatusUtil.success) {
+                    Helper.displaySnackBar(context, "Rating Successful!");
+                  } else if (ratingProvider.saveRatingStatus ==
+                      StatusUtil.error) {
+                    Helper.displaySnackBar(context,
+                        ratingProvider.errorMessage ?? "Error rating the car.");
+                  }
+                }
+              },
+              child: Text(
+                "Rate It",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _selectStartDate(BuildContext context) async {
