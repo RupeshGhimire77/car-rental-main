@@ -12,6 +12,11 @@ class RatingProvider extends ChangeNotifier {
 
   bool? isRated;
 
+  double? averageRating;
+
+  Map<String, List<double>> carRatings = {};
+  Map<String, List<double>> ratingList = {};
+
   RatingService ratingService = RatingServiceImpl();
 
   TextEditingController ratingController = TextEditingController();
@@ -107,6 +112,59 @@ class RatingProvider extends ChangeNotifier {
     } else {
       isRated = false;
       setSaveIsCarRatedStatus(StatusUtil.none);
+    }
+  }
+
+  Future<void> calculateAverageRating1(String carId) async {
+    try {
+      QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
+          .collection("rating")
+          .where("carId", isEqualTo: carId)
+          .get();
+
+      if (ratingSnapshot.docs.isNotEmpty) {
+        // Calculate the sum of ratings
+        double totalRating = 0;
+        for (var doc in ratingSnapshot.docs) {
+          var data = doc.data() as Map<String, dynamic>;
+          totalRating += double.parse(data["rating"]);
+        }
+
+        // Calculate average
+        averageRating = totalRating / ratingSnapshot.docs.length;
+      } else {
+        averageRating = 0; // No ratings found, default to 0
+      }
+
+      notifyListeners();
+    } catch (e) {
+      averageRating = null; // Handle any errors
+      print("Error calculating average rating: $e");
+    }
+  }
+
+  Future<void> calculateAverageRating(String carId) async {
+    try {
+      QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
+          .collection("rating")
+          .where("carId", isEqualTo: carId)
+          .get();
+
+      if (ratingSnapshot.docs.isNotEmpty) {
+        double totalRating = 0;
+        for (var doc in ratingSnapshot.docs) {
+          var data = doc.data() as Map<String, dynamic>;
+          totalRating += double.parse(data["rating"]);
+        }
+        double average = totalRating / ratingSnapshot.docs.length;
+        ratingList[carId] = [average]; // Store in the list using carId as key
+      } else {
+        ratingList[carId] = [0.0]; // Default to 0 if no ratings found
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print("Error calculating average rating: $e");
     }
   }
 
