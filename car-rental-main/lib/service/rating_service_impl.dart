@@ -35,6 +35,42 @@ class RatingServiceImpl implements RatingService {
     }
   }
 
+  @override
+  Future<ApiResponse> getAverageRating(String carId) async {
+    try {
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('rating')
+          .where('carId', isEqualTo: carId)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return ApiResponse(
+          statusUtil: StatusUtil.success,
+          data: 0.0,
+        ); // No ratings for the car
+      }
+
+      double totalRating = 0.0;
+      int numberOfRatings = querySnapshot.docs.length;
+
+      for (var doc in querySnapshot.docs) {
+        totalRating += (doc.data() as Map<String, dynamic>)['rating'];
+      }
+
+      double averageRating = totalRating / numberOfRatings;
+
+      return ApiResponse(
+        statusUtil: StatusUtil.success,
+        data: averageRating,
+      );
+    } catch (e) {
+      return ApiResponse(
+        statusUtil: StatusUtil.error,
+        errorMessage: 'Error fetching average rating: $e',
+      );
+    }
+  }
+
   // Future<ApiResponse> saveRating(Rating rating) async {
   //   if (await Helper.isInternetConnectionAvailable()) {
   //     try {

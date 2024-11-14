@@ -3,6 +3,7 @@ import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
+import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
@@ -19,7 +20,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  double averageRating = 0.0;
+  int numberOfRatings = 0;
   User1? user;
+  Car? car;
   List<Car> filteredCars = [];
   TextEditingController searchController = TextEditingController();
 
@@ -32,9 +36,24 @@ class _HomePageState extends State<HomePage> {
     getUserData();
     getCarData();
     getBrandData();
-
     // filteredCars = Provider.of<CarProvider>(context, listen: false).carList;
   }
+
+  // Future<void> _fetchCarRating(String carId) async {
+  //   final ratingProvider = Provider.of<RatingProvider>(context, listen: false);
+  //   Map<String, dynamic> ratingDetails =
+  //       await ratingProvider.getCarRatingDetails(carId);
+
+  //   setState(() {
+  //     averageRating = ratingDetails['averageRating'];
+  //     numberOfRatings = ratingDetails['numberOfRatings'];
+  //   });
+  // }
+
+  // void _onCarSelected(Car car) {
+  //   // Call the fetch function with the selected car's ID
+  //   _fetchCarRating(car.id!);
+  // }
 
   String? name, email, role;
 
@@ -199,107 +218,109 @@ class _HomePageState extends State<HomePage> {
               )
             ],
           ),
-          body: Consumer<CarProvider>(
-            builder: (context, carProvider, child) => carProvider
-                        .getCarStatus ==
-                    StatusUtil.loading
-                ? Center(child: CircularProgressIndicator())
-                : ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 30),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * .6,
-                          height: MediaQuery.of(context).size.width * .4,
-                          child: ClipRect(
-                            child: Image.asset(
-                              "assets/images/redcar1.png",
+          body: Consumer2<CarProvider, RatingProvider>(
+            builder: (context, carProvider, ratingProvider, child) =>
+                carProvider.getCarStatus == StatusUtil.loading
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 30),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * .6,
+                              height: MediaQuery.of(context).size.width * .4,
+                              child: ClipRect(
+                                child: Image.asset(
+                                  "assets/images/redcar1.png",
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, right: 20, bottom: 10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(.8),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: "Search...",
-                                    border: InputBorder.none,
-                                    icon: Icon(Icons.search),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 20, bottom: 10),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(.8),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        hintText: "Search...",
+                                        border: InputBorder.none,
+                                        icon: Icon(Icons.search),
+                                      ),
+                                      onChanged: _filteredCars,
+                                    ),
                                   ),
-                                  onChanged: _filteredCars,
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20)),
+                              color: Colors.brown[900],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 20, top: 5),
+                                  child: Text(
+                                    "Brands",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                _buildBrandListUI(),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 5, left: 20),
+                                  child: Text(
+                                    "Cars",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 10),
+                                  child: GridView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 4,
+                                      crossAxisSpacing: 1,
+                                    ),
+                                    itemCount: filteredCars.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildCarCard(context,
+                                          filteredCars[index], ratingProvider);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(20)),
-                          color: Colors.brown[900],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 20, top: 5),
-                              child: Text(
-                                "Brands",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            _buildBrandListUI(),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5, left: 20),
-                              child: Text(
-                                "Cars",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 10),
-                              child: GridView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 4,
-                                  crossAxisSpacing: 1,
-                                ),
-                                itemCount: filteredCars.length,
-                                itemBuilder: (context, index) {
-                                  return _buildCarCard(
-                                      context, filteredCars[index]);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
           )),
     );
   }
@@ -393,7 +414,9 @@ Widget _buildBrandListUI() {
   );
 }
 
-Widget _buildCarCard(BuildContext context, Car car) {
+Widget _buildCarCard(
+    BuildContext context, Car car, RatingProvider ratingProvider) {
+  ratingProvider.calculateAverageRating(car.id!);
   return SizedBox(
     height: 300,
     width: 300,
@@ -476,6 +499,25 @@ Widget _buildCarCard(BuildContext context, Car car) {
                     ),
                   ),
             SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.star,
+                    size: 16,
+                    color: Colors.yellow[900],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 3.0),
+                    child: Text(
+                      "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Text(car.model!),

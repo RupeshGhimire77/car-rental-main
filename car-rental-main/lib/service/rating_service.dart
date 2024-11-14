@@ -3,4 +3,5 @@ import 'package:flutter_application_1/model/rating.dart';
 
 abstract class RatingService {
   Future<ApiResponse> saveRating(Rating rating);
+  Future<ApiResponse> getAverageRating(String carId);
 }

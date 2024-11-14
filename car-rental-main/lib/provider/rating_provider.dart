@@ -14,6 +14,9 @@ class RatingProvider extends ChangeNotifier {
 
   RatingService ratingService = RatingServiceImpl();
 
+  Map<String, List<double>> ratingList = {};
+  Map<String, List<int>> totalNoOfRatings = {};
+
   TextEditingController ratingController = TextEditingController();
 
   StatusUtil _saveRatingStatus = StatusUtil.none;
@@ -150,6 +153,35 @@ class RatingProvider extends ChangeNotifier {
         'averageRating': 0.0,
         'numberOfRatings': 0,
       };
+    }
+  }
+
+  Future<void> calculateAverageRating(String carId) async {
+    try {
+      QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
+          .collection("rating")
+          .where("carId", isEqualTo: carId)
+          .get();
+
+      if (ratingSnapshot.docs.isNotEmpty) {
+        double totalRating = 0;
+        for (var doc in ratingSnapshot.docs) {
+          var data = doc.data() as Map<String, dynamic>;
+          totalRating += double.parse(data["rating"]);
+        }
+        double average = totalRating / ratingSnapshot.docs.length;
+
+        ratingList[carId] = [average]; // Store in the list using carId as key
+
+        int noOfRatings = ratingSnapshot.docs.length;
+        totalNoOfRatings[carId] = [noOfRatings];
+      } else {
+        ratingList[carId] = [0.0]; // Default to 0 if no ratings found
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print("Error calculating average rating: $e");
     }
   }
 

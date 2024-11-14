@@ -11,7 +11,7 @@ import 'package:flutter_application_1/user_edit.dart';
 import 'package:flutter_application_1/utils/string_const.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/admin_bottom.navbar.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
-import 'package:flutter_application_1/view/home/bottom%20nav%20bar/payment.dart';
+
 import 'package:flutter_application_1/view/home/bottom_navbar.dart';
 import 'package:flutter_application_1/view/home/user%20login/login.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';

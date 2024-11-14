@@ -261,7 +261,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
                         vertical: 20, horizontal: 20),
                     child: Container(
                       color: Color(0xff181A1B),
-                      height: MediaQuery.of(context).size.height * .8,
+                      height: MediaQuery.of(context).size.height * .68,
                       width: MediaQuery.of(context).size.width * .9,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 10, left: 15),
@@ -734,9 +734,6 @@ class _DescriptionPageState extends State<DescriptionPage> {
               SizedBox(
                 width: 10,
               ),
-              SizedBox(
-                width: 10,
-              ),
               Text(
                 "(${averageRating.toStringAsFixed(1)}/5) $numberOfRatings",
                 style: TextStyle(color: Colors.white, fontSize: 18),
@@ -754,13 +751,15 @@ class _DescriptionPageState extends State<DescriptionPage> {
                   );
                   if (ratingProvider.saveRatingStatus == StatusUtil.success) {
                     Helper.displaySnackBar(context, "Rating Successful!");
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DescriptionPage(),
-                      ),
-                      (route) => false,
-                    );h
+                    // Navigator.pushAndRemoveUntil(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => DescriptionPage(
+                    //       car: widget.car,
+                    //     ),
+                    //   ),
+                    //   (route) => false,
+                    // );
                   } else if (ratingProvider.saveRatingStatus ==
                       StatusUtil.error) {
                     Helper.displaySnackBar(context,
