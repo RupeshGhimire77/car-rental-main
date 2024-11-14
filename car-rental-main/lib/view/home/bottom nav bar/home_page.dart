@@ -130,6 +130,36 @@ class _HomePageState extends State<HomePage> {
   //   );
   // }
 
+  // getCarData() async {
+  //   Future.delayed(
+  //     Duration.zero,
+  //     () async {
+  //       final prefs = await SharedPreferences.getInstance();
+  //       final lastSearchedBrand = prefs.getString('lastSearchedBrand');
+
+  //       var provider = Provider.of<CarProvider>(context, listen: false);
+  //       await provider.getCar();
+
+  //       // Prioritize cars with the last-searched brand
+  //       List<Car> sortedCars = provider.carList;
+  //       if (lastSearchedBrand != null && lastSearchedBrand.isNotEmpty) {
+  //         sortedCars.sort((a, b) {
+  //           if (a.brand == lastSearchedBrand && b.brand != lastSearchedBrand) {
+  //             return -1;
+  //           } else if (a.brand != lastSearchedBrand &&
+  //               b.brand == lastSearchedBrand) {
+  //             return 1;
+  //           }
+  //           return 0;
+  //         });
+  //       }
+
+  //       setState(() {
+  //         filteredCars = sortedCars;
+  //       });
+  //     },
+  //   );
+  // }
   getCarData() async {
     Future.delayed(
       Duration.zero,
@@ -137,11 +167,14 @@ class _HomePageState extends State<HomePage> {
         final prefs = await SharedPreferences.getInstance();
         final lastSearchedBrand = prefs.getString('lastSearchedBrand');
 
-        var provider = Provider.of<CarProvider>(context, listen: false);
-        await provider.getCar();
+        var carProvider = Provider.of<CarProvider>(context, listen: false);
+        var ratingProvider =
+            Provider.of<RatingProvider>(context, listen: false);
+
+        await carProvider.getCar();
 
         // Prioritize cars with the last-searched brand
-        List<Car> sortedCars = provider.carList;
+        List<Car> sortedCars = carProvider.carList;
         if (lastSearchedBrand != null && lastSearchedBrand.isNotEmpty) {
           sortedCars.sort((a, b) {
             if (a.brand == lastSearchedBrand && b.brand != lastSearchedBrand) {
@@ -154,11 +187,34 @@ class _HomePageState extends State<HomePage> {
           });
         }
 
+        // Sort cars based on ratings using Bubble Sort
+        bubbleSortCarsByRating(sortedCars, ratingProvider);
+
         setState(() {
           filteredCars = sortedCars;
         });
       },
     );
+  }
+
+  void bubbleSortCarsByRating(List<Car> cars, RatingProvider ratingProvider) {
+    int n = cars.length;
+    for (int i = 0; i < n - 1; i++) {
+      for (int j = 0; j < n - i - 1; j++) {
+        // Get the average ratings for the cars
+        double ratingA = ratingProvider.ratingList[cars[j].id]?.first ?? 0.0;
+        double ratingB =
+            ratingProvider.ratingList[cars[j + 1].id]?.first ?? 0.0;
+
+        // Swap if the car at j has a lower rating than the car at j+1
+        if (ratingA < ratingB) {
+          // Swap cars
+          Car temp = cars[j];
+          cars[j] = cars[j + 1];
+          cars[j + 1] = temp;
+        }
+      }
+    }
   }
 
   getBrandData() async {
