@@ -4,6 +4,7 @@ import 'package:flutter_application_1/model/book_car.dart';
 import 'package:flutter_application_1/model/car.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
+import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/service/stripe_service.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
@@ -116,8 +117,8 @@ class _HistoryState extends State<History> {
           )
         ],
       ),
-      body: Consumer2<CarProvider, BookCarProvider>(
-          builder: (context, carProvider, bookCarProvider, child) {
+      body: Consumer3<CarProvider, BookCarProvider, RatingProvider>(builder:
+          (context, carProvider, bookCarProvider, ratingProvider, child) {
         final userBookings = bookCarProvider.getUserBookings(userEmail);
         if (userBookings == null || userBookings.isEmpty) {
           return Center(
@@ -158,7 +159,7 @@ class _HistoryState extends State<History> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildCarCard(context, carDetails!),
+                            _buildCarCard(context, carDetails!, ratingProvider),
                             // Text(
                             //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
                             Column(
@@ -360,7 +361,9 @@ class _HistoryState extends State<History> {
     );
   }
 
-  Widget _buildCarCard(BuildContext context, Car car) {
+  Widget _buildCarCard(
+      BuildContext context, Car car, RatingProvider ratingProvider) {
+    ratingProvider.calculateAverageRating(car.id!);
     return Column(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -435,6 +438,23 @@ class _HistoryState extends State<History> {
                               // SizedBox(height: 5),
                               Column(
                                 children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: Colors.yellow[800],
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 3.0),
+                                        child: Text(
+                                          "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text(car.model!),

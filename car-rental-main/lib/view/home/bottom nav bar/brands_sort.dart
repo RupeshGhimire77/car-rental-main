@@ -3,6 +3,7 @@ import 'package:flutter_application_1/model/brand.dart';
 import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
+import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:provider/provider.dart';
@@ -106,20 +107,20 @@ class _BrandsSortState extends State<BrandsSort> {
             ),
           ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20, top: 8),
-              child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.notifications_active,
-                    color: Colors.white,
-                    size: 27.5,
-                  )),
-            )
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 20, top: 8),
+            //   child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(
+            //         Icons.notifications_active,
+            //         color: Colors.white,
+            //         size: 27.5,
+            //       )),
+            // )
           ],
         ),
-        body: Consumer<CarProvider>(
-          builder: (context, carProvider, child) {
+        body: Consumer2<CarProvider, RatingProvider>(
+          builder: (context, carProvider, ratingProvider, child) {
             // Filter cars by the selected brand name
             var filteredCars = carProvider.carList
                 .where((car) => car.brand == widget.brandName)
@@ -159,6 +160,8 @@ class _BrandsSortState extends State<BrandsSort> {
                                 filteredCars
                                     .length, // Use the filtered car list
                                 (index) {
+                                  ratingProvider.calculateAverageRating(
+                                      filteredCars[index].id!);
                                   return SizedBox(
                                     height: 300,
                                     width: 300,
@@ -203,6 +206,30 @@ class _BrandsSortState extends State<BrandsSort> {
                                                   )
                                                 : _buildImageErrorPlaceholder(),
                                             SizedBox(height: 5),
+                                            Row(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 8.0),
+                                                  child: Icon(
+                                                    Icons.star,
+                                                    size: 16,
+                                                    color: Colors.yellow[800],
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 3.0),
+                                                  child: Text(
+                                                    "(${(ratingProvider.ratingList[filteredCars[index].id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[filteredCars[index].id]?.first ?? 0}",
+                                                    style:
+                                                        TextStyle(fontSize: 12),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   left: 8.0),

@@ -56,6 +56,7 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
     provider.fuelType = car?.fuelType ?? "";
     provider.mileage = car?.mileage ?? "";
     provider.rentalPrice = car?.rentalPrice ?? "";
+    provider.availableStatusTextField.text = car?.availableStatus ?? "";
 
     // carImageUpdateController.text = widget.car?.image ?? "";
   }
@@ -66,6 +67,11 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
     await provider.getCar(); // Fetching the car list
     setState(() => isLoading = false);
   }
+
+  String? selectedValue;
+  final List<String> items = ['Available', 'Booked', 'Renting', 'Unavailable'];
+  // final TextEditingController availableStatustextController =
+  //     TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +302,37 @@ class _UpdateCarDetailsState extends State<UpdateCarDetails> {
                       labelText: rentalPriceStr,
                       keyboardType: TextInputType.number,
                     ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, right: 20),
+                      child: DropdownButtonFormField<String>(
+                        focusColor: Color(0xff7B776D),
+                        value: selectedValue,
+                        hint: Text('Select Status'),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedValue = newValue;
+                            carProvider.availableStatusTextField.text =
+                                selectedValue!;
+                          });
+                        },
+                        items:
+                            items.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+
                     Padding(
                       padding: const EdgeInsets.only(bottom: 30),
                       child: CustomButton(

@@ -146,16 +146,16 @@ class _DescriptionPageState extends State<DescriptionPage> {
             ),
           ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 20, top: 8),
-              child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.notifications_active,
-                    color: Colors.white,
-                    size: 27.5,
-                  )),
-            )
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 20, top: 8),
+            //   child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(
+            //         Icons.notifications_active,
+            //         color: Colors.white,
+            //         size: 27.5,
+            //       )),
+            // )
           ],
         ),
         body: Center(

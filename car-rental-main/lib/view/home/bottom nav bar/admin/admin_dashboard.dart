@@ -9,6 +9,7 @@ import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/book_car_provider.dart';
 import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
+import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/shared/custom_button.dart';
@@ -289,6 +290,11 @@ class AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
+  String? selectedValue;
+  final List<String> items = ['Available', 'Booked', 'Renting', 'Unavailable'];
+  final TextEditingController availableStatustextController =
+      TextEditingController();
+
   Widget _buildAddCarForm() {
     return Consumer<CarProvider>(
       builder: (context, carProvider, child) => Form(
@@ -414,6 +420,34 @@ class AdminDashboardState extends State<AdminDashboard> {
                 },
                 labelText: rentalPriceStr,
                 keyboardType: TextInputType.number,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20),
+                child: DropdownButtonFormField<String>(
+                  focusColor: Color(0xff7B776D),
+                  value: selectedValue,
+                  hint: Text('Select Status'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedValue = newValue;
+                      carProvider.availableStatusTextField.text =
+                          selectedValue!;
+                    });
+                  },
+                  items: items.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
               ),
               CustomButton(
                   onPressed: () async {
@@ -563,6 +597,8 @@ class AdminDashboardState extends State<AdminDashboard> {
                                     "Brand: ", car.brand ?? "N/A"),
                                 _buildCarDetailRow(
                                     "Rental Price: ", car.rentalPrice ?? "N/A"),
+                                _buildCarDetailRow("Available Status: ",
+                                    car.availableStatus ?? "")
                               ],
                             ),
                             Spacer(),
@@ -847,8 +883,10 @@ class AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _buildRentedCarList() {
-    return Consumer3<CarProvider, BookCarProvider, UserProvider>(
-        builder: (context, carProvider, bookCarProvider, userProvider, child) {
+    return Consumer4<CarProvider, BookCarProvider, UserProvider,
+            RatingProvider>(
+        builder: (context, carProvider, bookCarProvider, userProvider,
+            ratingProvider, child) {
       print(bookCarProvider.bookList);
 
       if (bookCarProvider.bookList.isEmpty) {
@@ -889,7 +927,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildCarCard(context, carDetails),
+                          _buildCarCard(context, carDetails, ratingProvider),
                           // Text(
                           //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
                           Column(
@@ -1109,7 +1147,9 @@ class AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _buildCarCard(BuildContext context, Car car) {
+  Widget _buildCarCard(
+      BuildContext context, Car car, RatingProvider ratingProvider) {
+    ratingProvider.calculateAverageRating(car.id!);
     return Column(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1184,6 +1224,23 @@ class AdminDashboardState extends State<AdminDashboard> {
                               // SizedBox(height: 5),
                               Column(
                                 children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: Colors.yellow[800],
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 3.0),
+                                        child: Text(
+                                          "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text(car.model!),

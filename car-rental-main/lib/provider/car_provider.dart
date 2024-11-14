@@ -17,10 +17,13 @@ class CarProvider extends ChangeNotifier {
       fuelType = "",
       mileage = "",
       rentalPrice = "";
+  // availableStatus = "";
   String? errorMessage = "";
   // String? id;
   TextEditingController? imageTextField;
   TextEditingController? imageTextFieldController = TextEditingController();
+
+  TextEditingController availableStatusTextField = TextEditingController();
   bool carDeleteSuccessfull = false;
 
   bool isSuccess = false;
@@ -62,6 +65,10 @@ class CarProvider extends ChangeNotifier {
 
   setRentalPrice(value) {
     rentalPrice = value;
+  }
+
+  setAvailableStatus(value) {
+    availableStatusTextField = TextEditingController(text: value);
   }
 
   List<Car> carList = [];
@@ -124,7 +131,8 @@ class CarProvider extends ChangeNotifier {
         mileage: mileage,
         brand: brand,
         seatingCapacity: seatingCapacity,
-        rentalPrice: rentalPrice);
+        rentalPrice: rentalPrice,
+        availableStatus: availableStatusTextField.text);
 
     // if (id!.isNotEmpty) {
     //   response = await carService.updateCarData(car);
@@ -157,7 +165,8 @@ class CarProvider extends ChangeNotifier {
         mileage: mileage,
         brand: brand,
         seatingCapacity: seatingCapacity,
-        rentalPrice: rentalPrice);
+        rentalPrice: rentalPrice,
+        availableStatus: availableStatusTextField.text);
 
     ApiResponse response = await carService.updateCarData(car);
 
@@ -223,7 +232,8 @@ class CarProvider extends ChangeNotifier {
         mileage: mileage,
         brand: brand,
         seatingCapacity: seatingCapacity,
-        rentalPrice: rentalPrice);
+        rentalPrice: rentalPrice,
+        availableStatus: availableStatusTextField.text);
 
     ApiResponse response = await carService.getCarDetails(car);
     if (response.statusUtil == StatusUtil.success) {

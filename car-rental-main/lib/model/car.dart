@@ -10,6 +10,8 @@ class Car {
   String? rentalPrice;
   String? image;
 
+  String? availableStatus;
+
   Car(
       {this.id,
       this.model,
@@ -20,7 +22,8 @@ class Car {
       this.fuelType,
       this.mileage,
       this.rentalPrice,
-      this.image});
+      this.image,
+      this.availableStatus});
 
   Car.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -33,6 +36,8 @@ class Car {
     mileage = json['mileage'];
     rentalPrice = json['rentalPrice'];
     image = json['image'];
+
+    availableStatus = json['availableStatus'];
   }
 
   Map<String, dynamic> toJson() {
@@ -47,6 +52,8 @@ class Car {
     data['mileage'] = this.mileage;
     data['rentalPrice'] = this.rentalPrice;
     data['image'] = this.image;
+
+    data['availableStatus'] = this.availableStatus;
     return data;
   }
 }
