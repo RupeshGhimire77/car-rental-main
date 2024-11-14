@@ -22,6 +22,7 @@ import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/update_
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:flutter_application_1/view/home/user%20login/login.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -988,6 +989,97 @@ class AdminDashboardState extends State<AdminDashboard> {
                                         ),
                                       ],
                                     ),
+                                    booking.bookCarImage != null
+                                        ? Row(
+                                            children: [
+                                              Text("License: "),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            FullScreenImagePage(
+                                                                imageUrl: booking
+                                                                    .bookCarImage!),
+                                                      ));
+                                                },
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadiusDirectional
+                                                          .circular(10),
+                                                  child: FadeInImage(
+                                                    placeholder: AssetImage(
+                                                        'assets/images/placeholder.png'), // Use an asset image placeholder or use `Shimmer` widget here
+                                                    image: NetworkImage(
+                                                        booking.bookCarImage!),
+                                                    height: 80,
+                                                    width: 100,
+                                                    fit: BoxFit.contain,
+                                                    imageErrorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return Shimmer.fromColors(
+                                                        baseColor: Colors.red,
+                                                        highlightColor:
+                                                            Colors.yellow,
+                                                        child: Container(
+                                                          color: Colors.grey,
+                                                          height: 80,
+                                                          width: 100,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Text(
+                                                            'Image Error',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    placeholderErrorBuilder:
+                                                        (context, error,
+                                                            stackTrace) {
+                                                      return Shimmer.fromColors(
+                                                        baseColor: Colors
+                                                            .deepPurple[300]!,
+                                                        highlightColor: Colors
+                                                            .deepPurple[100]!,
+                                                        child: Container(
+                                                          color: Colors.white,
+                                                          height: 80,
+                                                          width: 100,
+                                                          alignment:
+                                                              Alignment.center,
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Shimmer.fromColors(
+                                            baseColor: Colors.red,
+                                            highlightColor: Colors.yellow,
+                                            child: Container(
+                                              height: 80,
+                                              width: 100,
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                'Shimmer',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 40.0,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                   ],
                                 ),
                               ),
@@ -1149,7 +1241,7 @@ class AdminDashboardState extends State<AdminDashboard> {
 
   Widget _buildCarCard(
       BuildContext context, Car car, RatingProvider ratingProvider) {
-    ratingProvider.calculateAverageRating(car.id!);
+    // ratingProvider.calculateAverageRating(car.id!);
     return Column(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1224,23 +1316,23 @@ class AdminDashboardState extends State<AdminDashboard> {
                               // SizedBox(height: 5),
                               Column(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        size: 16,
-                                        color: Colors.yellow[800],
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 3.0),
-                                        child: Text(
-                                          "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //     Icon(
+                                  //       Icons.star,
+                                  //       size: 16,
+                                  //       color: Colors.yellow[800],
+                                  //     ),
+                                  //     Padding(
+                                  //       padding:
+                                  //           const EdgeInsets.only(left: 3.0),
+                                  //       child: Text(
+                                  //         "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
+                                  //         style: TextStyle(fontSize: 12),
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  // ),
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text(car.model!),
@@ -1674,5 +1766,24 @@ class AdminDashboardState extends State<AdminDashboard> {
       });
       print(e); // Print error for debugging
     }
+  }
+}
+
+class FullScreenImagePage extends StatelessWidget {
+  final String imageUrl;
+
+  FullScreenImagePage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PhotoView(
+        imageProvider: NetworkImage(imageUrl),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 2,
+        heroAttributes: PhotoViewHeroAttributes(
+            tag: imageUrl), // Optional for hero animation
+      ),
+    );
   }
 }

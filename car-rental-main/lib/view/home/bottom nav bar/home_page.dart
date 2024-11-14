@@ -340,20 +340,24 @@ class _HomePageState extends State<HomePage> {
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 10, horizontal: 10),
-                                  child: GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisSpacing: 4,
-                                      crossAxisSpacing: 1,
+                                  child: Expanded(
+                                    child: GridView.builder(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        mainAxisSpacing: 4,
+                                        crossAxisSpacing: 1,
+                                      ),
+                                      itemCount: filteredCars.length,
+                                      itemBuilder: (context, index) {
+                                        return _buildCarCard(
+                                            context,
+                                            filteredCars[index],
+                                            ratingProvider);
+                                      },
                                     ),
-                                    itemCount: filteredCars.length,
-                                    itemBuilder: (context, index) {
-                                      return _buildCarCard(context,
-                                          filteredCars[index], ratingProvider);
-                                    },
                                   ),
                                 ),
                               ],
@@ -566,6 +570,10 @@ class _HomePageState extends State<HomePage> {
               Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Text("Rs. " + car.rentalPrice! + "/day"),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(car.availableStatus!),
               )
             ],
           ),
