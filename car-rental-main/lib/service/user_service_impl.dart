@@ -15,12 +15,16 @@ class UserServiceImpl extends UserService {
 
     if (await Helper.isInternetConnectionAvailable()) {
       try {
-        await FirebaseFirestore.instance
-            .collection("carrent")
-            .add(user.toJson())
-            .then((value) {
-          isSuccess = true;
-        });
+        DocumentReference docRef = await FirebaseFirestore.instance
+            .collection("user")
+            .add(user.toJson());
+
+        user.id = docRef.id;
+
+        await docRef.update({'id': user.id});
+
+        isSuccess = true;
+
         return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
       } catch (e) {
         return ApiResponse(
@@ -36,8 +40,7 @@ class UserServiceImpl extends UserService {
   Future<ApiResponse> getUser() async {
     if (await Helper.isInternetConnectionAvailable()) {
       try {
-        var value =
-            await FirebaseFirestore.instance.collection("carrent").get();
+        var value = await FirebaseFirestore.instance.collection("user").get();
         var userList = value.docs.map((e) => User1.fromJson(e.data())).toList();
         for (int i = 0; i < userList.length; i++) {
           userList[i].id = value.docs[i].id;
@@ -61,7 +64,7 @@ class UserServiceImpl extends UserService {
 
     try {
       await FirebaseFirestore.instance
-          .collection("carrent")
+          .collection("user")
           .where("email", isEqualTo: user.email)
           .where("password", isEqualTo: user.password)
           .get()
@@ -82,7 +85,7 @@ class UserServiceImpl extends UserService {
     bool isEmailExist = false;
     try {
       var value = await FirebaseFirestore.instance
-          .collection("carrent")
+          .collection("user")
           .where("email", isEqualTo: user.email)
           .get();
       if (value.docs.isNotEmpty) {
@@ -101,7 +104,7 @@ class UserServiceImpl extends UserService {
     bool isMobileNumberExist = false;
     try {
       var value = await FirebaseFirestore.instance
-          .collection("carrent")
+          .collection("user")
           .where("mobileNumber", isEqualTo: user.mobileNumber)
           .get();
       if (value.docs.isNotEmpty) {
@@ -109,6 +112,48 @@ class UserServiceImpl extends UserService {
       }
       return ApiResponse(
           statusUtil: StatusUtil.success, data: isMobileNumberExist);
+    } catch (e) {
+      return ApiResponse(
+          statusUtil: StatusUtil.error, errorMessage: e.toString());
+    }
+  }
+
+  @override
+  Future<ApiResponse> deleteUser(String? id) async {
+    bool isSuccess = false;
+    if (await Helper.isInternetConnectionAvailable()) {
+      try {
+        await FirebaseFirestore.instance
+            .collection("user")
+            .doc(id)
+            .delete()
+            .then(
+          (value) {
+            isSuccess = true;
+          },
+        );
+
+        return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
+      } catch (e) {
+        return ApiResponse(
+            statusUtil: StatusUtil.error, errorMessage: e.toString());
+      }
+    }
+    return ApiResponse(
+        statusUtil: StatusUtil.error, errorMessage: noInternetConnectionStr);
+  }
+
+  @override
+  Future<ApiResponse> updateUserData(User1 user) async {
+    bool isSuccess = false;
+    try {
+      await FirebaseFirestore.instance
+          .collection("user")
+          .doc(user.id)
+          .update(user.toJson())
+          .then((value) => isSuccess = true);
+
+      return ApiResponse(statusUtil: StatusUtil.success, data: isSuccess);
     } catch (e) {
       return ApiResponse(
           statusUtil: StatusUtil.error, errorMessage: e.toString());

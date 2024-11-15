@@ -13,6 +13,7 @@ import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
+import 'package:loading_animations/loading_animations.dart';
 import 'package:nepali_date_picker/nepali_date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,283 +83,339 @@ class _HistoryState extends State<History> {
 
   Widget build(BuildContext context) {
     final userEmail = email ?? '';
-    return Scaffold(
-      backgroundColor: Color(0xff771616),
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: Color(0xFF771616),
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 20),
-          child: CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage("assets/images/background_person.png"),
-
-            // backgroundColor: Colors.transparent,
-          ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 8),
-          child: Text(
-            name ?? "",
-            // "",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20, top: 8),
-            child: IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_active,
-                  color: Colors.white,
-                  size: 27.5,
-                )),
-          )
-        ],
-      ),
-      body: Consumer3<CarProvider, BookCarProvider, RatingProvider>(builder:
-          (context, carProvider, bookCarProvider, ratingProvider, child) {
-        final userBookings = bookCarProvider.getUserBookings(userEmail);
-        if (userBookings == null || userBookings.isEmpty) {
-          return Center(
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      final userDetails = userProvider.getUserByEmail(email);
+      return Scaffold(
+        backgroundColor: Color(0xff771616),
+        appBar: AppBar(
+          toolbarHeight: 60,
+          backgroundColor: Color(0xFF771616),
+          leading: Padding(
+              padding: const EdgeInsets.only(top: 8, left: 20),
+              child:
+                  userDetails?.image != null && userDetails!.image!.isNotEmpty
+                      ? CircleAvatar(
+                          radius: 60, // Adjust the radius as needed
+                          backgroundColor:
+                              Colors.grey, // Background color while loading
+                          child: ClipOval(
+                            child: FadeInImage(
+                              placeholder:
+                                  AssetImage('assets/images/placeholder.png'),
+                              image: NetworkImage(userDetails!.image!),
+                              fit: BoxFit.cover,
+                              imageErrorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey,
+                                  height: 120,
+                                  width:
+                                      120, // Use the same width and height for CircleAvatar
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Image Error',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                              placeholderErrorBuilder:
+                                  (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.white,
+                                  height: 120,
+                                  width:
+                                      120, // Use the same width and height for CircleAvatar
+                                  alignment: Alignment.center,
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      : Container(
+                          height: 120,
+                          width: 120,
+                          child: LoadingRotating.square(
+                            borderColor: Colors.red,
+                            borderSize: 3.0,
+                            size: 60.0,
+                          ),
+                        )),
+          title: Padding(
+            padding: const EdgeInsets.only(top: 8, left: 8),
             child: Text(
-              "You have yet to rent any car.",
-              style: TextStyle(color: Colors.white, fontSize: 20),
+              name ?? "",
+              // "",
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
-          );
-        }
+          ),
+          actions: [
+            // Padding(
+            //   padding: const EdgeInsets.only(right: 20, top: 8),
+            //   child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(
+            //         Icons.notifications_active,
+            //         color: Colors.white,
+            //         size: 27.5,
+            //       )),
+            // )
+          ],
+        ),
+        body: Consumer3<CarProvider, BookCarProvider, RatingProvider>(builder:
+            (context, carProvider, bookCarProvider, ratingProvider, child) {
+          final userBookings = bookCarProvider.getUserBookings(userEmail);
+          if (userBookings == null || userBookings.isEmpty) {
+            return Center(
+              child: Text(
+                "You have yet to rent any car.",
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            );
+          }
 
-        return Column(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: userBookings.length,
-                scrollDirection: Axis.vertical,
-                itemBuilder: (context, index) {
-                  final booking = userBookings[index];
-                  final carDetails = carProvider.getCarById(booking.carId);
+          return Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: userBookings.length,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (context, index) {
+                    final booking = userBookings[index];
+                    final carDetails = carProvider.getCarById(booking.carId);
 
-                  // if (carDetails == null) {
-                  //   return Center(
-                  //     child: Text(
-                  //       "Car details not available",
-                  //       style: TextStyle(color: Colors.white),
-                  //     ),
-                  //   );
-                  // }
+                    // if (carDetails == null) {
+                    //   return Center(
+                    //     child: Text(
+                    //       "Car details not available",
+                    //       style: TextStyle(color: Colors.white),
+                    //     ),
+                    //   );
+                    // }
 
-                  return Center(
-                    child: SizedBox(
-                      // height: MediaQuery.of(context).size.height * .2,
-                      width: MediaQuery.of(context).size.width * .9,
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildCarCard(context, carDetails!, ratingProvider),
-                            // Text(
-                            //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
-                            Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 25),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            "Pick-up Location: ",
-                                          ),
-                                          Text(
-                                            "${booking.pickUpPoint}",
-                                            style: TextStyle(
+                    return Center(
+                      child: SizedBox(
+                        // height: MediaQuery.of(context).size.height * .2,
+                        width: MediaQuery.of(context).size.width * .9,
+                        child: Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildCarCard(
+                                  context, carDetails!, ratingProvider),
+                              // Text(
+                              //     "Rental Price: ${carDetails?.rentalPrice ?? 'N/A'}"),
+                              Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 25),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Pick-up Location: ",
+                                            ),
+                                            Text(
+                                              "${booking.pickUpPoint}",
+                                              style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text("Start Date: "),
+                                            Text(
+                                              "${booking.startDate}",
+                                              style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Spacer(),
+                                            Text("End Date: "),
+                                            Text(
+                                              "${booking.endDate}",
+                                              style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text("Pick-up Time: "),
+                                            Text(
+                                              "${booking.pickUpTime}",
+                                              style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Spacer(),
+                                            Text("Drop Time: "),
+                                            Text(
+                                              "${booking.dropTime}",
+                                              style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text("Rental Period: "),
+                                            Text(
+                                              "${rentalPeriod(booking.startDate!, booking.endDate!)} days",
+                                              style: TextStyle(
                                                 color: Colors.redAccent,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text("Start Date: "),
-                                          Text(
-                                            "${booking.startDate}",
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // do not show  buttons if clicked cancelled
+                                  booking.isPaid == true
+                                      ? Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 23, right: 4),
+                                          child: Text(
+                                            "You Have Already Paid for this Rental Car.",
                                             style: TextStyle(
-                                                color: Colors.redAccent,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Spacer(),
-                                          Text("End Date: "),
-                                          Text(
-                                            "${booking.endDate}",
-                                            style: TextStyle(
-                                                color: Colors.redAccent,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text("Pick-up Time: "),
-                                          Text(
-                                            "${booking.pickUpTime}",
-                                            style: TextStyle(
-                                                color: Colors.redAccent,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Spacer(),
-                                          Text("Drop Time: "),
-                                          Text(
-                                            "${booking.dropTime}",
-                                            style: TextStyle(
-                                                color: Colors.redAccent,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text("Rental Period: "),
-                                          Text(
-                                            "${rentalPeriod(booking.startDate!, booking.endDate!)} days",
-                                            style: TextStyle(
-                                              color: Colors.redAccent,
+                                              color: Colors.red,
+                                              fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // do not show  buttons if clicked cancelled
-                                booking.isPaid == true
-                                    ? Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 23, right: 4),
-                                        child: Text(
-                                          "You Have Already Paid for this Rental Car.",
-                                          style: TextStyle(
-                                            color: Colors.red,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      )
-                                    : booking.isApproved == true
-                                        ? Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 5, left: 24, right: 4),
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  "Your booking has been approved.",
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "Please Pay the required amount.",
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                CustomBookButton(
-                                                  onPressed: () async {
-                                                    final successPayment =
-                                                        await StripeService
-                                                            .instance
-                                                            .makePayment(
-                                                                context,
-                                                                booking,
-                                                                carDetails
-                                                                    .rentalPrice!,
-                                                                email!);
-
-                                                    if (successPayment) {
-                                                      bookCarProvider
-                                                          .isPaidCarBooking(
-                                                              booking
-                                                                  .bookCarId!);
-                                                    } else {
-                                                      await Helper
-                                                          .displaySnackBar(
-                                                              context,
-                                                              "Payment Failed.");
-                                                    }
-                                                  },
-                                                  child: Text(
-                                                    "Booking Payment",
+                                        )
+                                      : booking.isApproved == true
+                                          ? Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5, left: 24, right: 4),
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    "Your booking has been approved.",
                                                     style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "Note: Only after payment will your rental car be delivered to you.",
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : booking.isCancelled == true
-                                            ? Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 23, right: 4),
-                                                child: Text(
-                                                  "Booking was cancelled By You",
-                                                  style: TextStyle(
-                                                    color: Colors.red,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              )
-                                            : booking.isCancelledByAdmin == true
-                                                ? Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 23, right: 4),
-                                                    child: Text(
-                                                      "Your Booking was Cancelled",
-                                                      style: TextStyle(
-                                                        color: Colors.red,
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
+                                                      color: Colors.red,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
-                                                  )
-                                                : _buildActionButtons(context,
-                                                    booking, bookCarProvider)
-                              ],
-                            ),
-                          ],
+                                                  ),
+                                                  Text(
+                                                    "Please Pay the required amount.",
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  CustomBookButton(
+                                                    onPressed: () async {
+                                                      final successPayment =
+                                                          await StripeService
+                                                              .instance
+                                                              .makePayment(
+                                                                  context,
+                                                                  booking,
+                                                                  carDetails
+                                                                      .rentalPrice!,
+                                                                  email!);
+
+                                                      if (successPayment) {
+                                                        bookCarProvider
+                                                            .isPaidCarBooking(
+                                                                booking
+                                                                    .bookCarId!);
+                                                      } else {
+                                                        await Helper
+                                                            .displaySnackBar(
+                                                                context,
+                                                                "Payment Failed.");
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      "Booking Payment",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Note: Only after payment will your rental car be delivered to you.",
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          : booking.isCancelled == true
+                                              ? Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 23, right: 4),
+                                                  child: Text(
+                                                    "Booking was cancelled By You",
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                )
+                                              : booking.isCancelledByAdmin ==
+                                                      true
+                                                  ? Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 23,
+                                                              right: 4),
+                                                      child: Text(
+                                                        "Your Booking was Cancelled",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : _buildActionButtons(context,
+                                                      booking, bookCarProvider)
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            )
-          ],
-        );
-      }),
-    );
+                    );
+                  },
+                ),
+              )
+            ],
+          );
+        }),
+      );
+    });
   }
 
   Widget _buildCarCard(

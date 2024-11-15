@@ -252,19 +252,6 @@ class BookCarProvider extends ChangeNotifier {
         // print("Status set to loading");
       }
 
-      // Validate inputs
-      // if (bookCarId == null ||
-      //     pickUpPointController.text.isEmpty ||
-      //     startDateController.text.isEmpty ||
-      //     endDateController.text.isEmpty ||
-      //     pickUpTimeController.text.isEmpty ||
-      //     dropTimeController.text.isEmpty ||
-      //     bookCarImage!.text.isEmpty ||
-      //     email == null) {
-      //   print("One or more required fields are null or empty");
-      //   return;
-      // }
-
       BookCar bookCar = BookCar(
         bookCarId: bookCarId,
         pickUpPoint: pickUpPointController.text,

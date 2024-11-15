@@ -9,6 +9,8 @@ class User1 {
   String? confirmPassword;
   String? mobileNumber;
 
+  String? image;
+
   User1(
       {this.id,
       this.name,
@@ -16,7 +18,8 @@ class User1 {
       this.password,
       this.confirmPassword,
       this.role,
-      this.mobileNumber});
+      this.mobileNumber,
+      this.image});
 
   User1.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -26,6 +29,8 @@ class User1 {
     confirmPassword = json['confirmPassword'];
     mobileNumber = json['mobileNumber'];
     role = json['role'];
+
+    image = json['image'];
   }
 
   Map<String, dynamic> toJson() {
@@ -37,6 +42,8 @@ class User1 {
     data['confirmPassword'] = this.confirmPassword;
     data['mobileNumber'] = this.mobileNumber;
     data['role'] = this.role;
+
+    data['image'] = this.image;
     return data;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/api_response.dart';
 import 'package:flutter_application_1/model/user1.dart';
@@ -7,12 +8,15 @@ import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
-  // String? id;
+  String? id;
   String? name, email, password, confirmPassword, mobileNumber;
   String? errorMessage;
 
   bool isSuccess = false;
   // String? role;
+
+  bool isUserDelete = false;
+  bool isUserDataUpdated = false;
 
   bool showPassword = false;
   bool showConfirmPassword = false;
@@ -25,6 +29,18 @@ class UserProvider extends ChangeNotifier {
   TextEditingController emailTextField = TextEditingController();
   TextEditingController passwordTextField = TextEditingController();
   TextEditingController? roleTextField;
+
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController mobileNumberController;
+  late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
+
+  TextEditingController? imageController = TextEditingController();
+
+  setImage(value) {
+    imageController = TextEditingController(text: value);
+  }
 
   setRole(value) {
     roleTextField = TextEditingController(text: value);
@@ -83,6 +99,22 @@ class UserProvider extends ChangeNotifier {
   StatusUtil _getCheckMobileNumberOnSignUp = StatusUtil.none;
   StatusUtil get getCheckMobileNumberOnSignup => _getCheckMobileNumberOnSignUp;
 
+  StatusUtil _getUserDeleteStatus = StatusUtil.none;
+  StatusUtil get getUserDeleteStatus => _getUserDeleteStatus;
+
+  StatusUtil _getUserDataUpdateStatus = StatusUtil.none;
+  StatusUtil get getUserDataUpdateStatus => _getUserDataUpdateStatus;
+
+  setGetUserDataUpdateUserStatus(StatusUtil status) {
+    _getUserDataUpdateStatus = status;
+    notifyListeners();
+  }
+
+  setGetUserDeleteStatus(StatusUtil status) {
+    _getUserDeleteStatus = status;
+    notifyListeners();
+  }
+
   setGetCheckMobileNumberOnSignUp(StatusUtil status) {
     _getCheckEmailExistInSignUp = status;
     notifyListeners();
@@ -114,7 +146,7 @@ class UserProvider extends ChangeNotifier {
     }
 
     User1 user = User1(
-        // id: id,
+        id: id,
         role: roleTextField?.text,
         name: name,
         email: email,
@@ -248,6 +280,62 @@ class UserProvider extends ChangeNotifier {
     emailTextField.text = await prefs.getString('email') ?? "";
     passwordTextField.text = await prefs.getString('password') ?? "";
     notifyListeners();
+  }
+
+  Future<List<QueryDocumentSnapshot>> getUsersWithEmail(
+    String? email,
+  ) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("user")
+        .where("email", isEqualTo: email)
+        .get();
+
+    return snapshot.docs;
+  }
+
+  Future<void> deleteUser(String id) async {
+    if (_getUserDeleteStatus != StatusUtil.loading) {
+      setGetUserDeleteStatus(StatusUtil.loading);
+    }
+
+    ApiResponse response = await userService.deleteUser(id);
+    if (response.statusUtil == StatusUtil.success) {
+      isUserDelete = response.data;
+      setGetUserDeleteStatus(StatusUtil.success);
+    } else if (response.statusUtil == StatusUtil.error) {
+      errorMessage = response.data;
+      setGetUserDeleteStatus(StatusUtil.error);
+    }
+  }
+
+  Future<void> updateUserData(User1 user, String? id) async {
+    try {
+      if (_getUserDataUpdateStatus != StatusUtil.loading) {
+        setGetUserDataUpdateUserStatus(StatusUtil.loading);
+      }
+
+      User1 user = User1(
+        id: id,
+        role: roleTextField?.text,
+        name: nameController.text,
+        email: emailController.text,
+        password: passwordController.text,
+        confirmPassword: confirmPasswordController.text,
+        mobileNumber: mobileNumberController.text,
+        image: imageController?.text ?? "",
+      );
+
+      ApiResponse response = await userService.updateUserData(user);
+      if (response.statusUtil == StatusUtil.success) {
+        isSuccess = response.data;
+        setGetUserDataUpdateUserStatus(StatusUtil.success);
+      } else {
+        errorMessage = response.errorMessage;
+        setGetUserDataUpdateUserStatus(StatusUtil.error);
+      }
+    } catch (e) {
+      setGetUserDataUpdateUserStatus(StatusUtil.error);
+    }
   }
 }
 

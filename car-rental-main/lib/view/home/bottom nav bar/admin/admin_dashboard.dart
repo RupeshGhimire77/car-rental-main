@@ -859,6 +859,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                                     onPressed: () async {
                                       String brandId = brandProvider
                                           .brandList[index].brandId!;
+
                                       await deleteBrandShowDialog(
                                           context, brandProvider, brandId);
                                       // carProvider.deleteCar(carProvider.carList[index].id!);
@@ -1541,8 +1542,8 @@ class AdminDashboardState extends State<AdminDashboard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Car'),
-          content: Text('Are you sure you want to delete this car?'),
+          title: Text('Delete Brand'),
+          content: Text('Are you sure you want to delete this Brand?'),
           actions: [
             TextButton(
               onPressed: () async {
@@ -1550,7 +1551,7 @@ class AdminDashboardState extends State<AdminDashboard> {
 
                 if (brandProvider.deleteBrandStatus == StatusUtil.success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Car deleted successfully!")),
+                    SnackBar(content: Text("Brand deleted successfully!")),
                   );
                   // Call the method to refresh the car data
                   await brandProvider.getBrand(); // Refresh the car list
@@ -1559,7 +1560,7 @@ class AdminDashboardState extends State<AdminDashboard> {
                 } else if (brandProvider.deleteBrandStatus ==
                     StatusUtil.error) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Failed to delete car.")),
+                    SnackBar(content: Text("Failed to delete brand.")),
                   );
                 }
               },

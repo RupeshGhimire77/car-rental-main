@@ -6,6 +6,7 @@ import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
+import 'package:loading_animations/loading_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -82,22 +83,66 @@ class _BrandsSortState extends State<BrandsSort> {
   }
 
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) => Scaffold(
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      final userDetails = userProvider.getUserByEmail(email);
+      return Scaffold(
         backgroundColor: Color(0xff771616),
         appBar: AppBar(
           toolbarHeight: 60,
           backgroundColor: Color(0xFF771616),
           leading: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 20),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage:
-                  AssetImage("assets/images/background_person.png"),
-
-              // backgroundColor: Colors.transparent,
-            ),
-          ),
+              padding: const EdgeInsets.only(top: 8, left: 20),
+              child: userDetails?.image != null &&
+                      userDetails!.image!.isNotEmpty
+                  ? CircleAvatar(
+                      radius: 60, // Adjust the radius as needed
+                      backgroundColor:
+                          Colors.grey, // Background color while loading
+                      child: ClipOval(
+                        child: FadeInImage(
+                          placeholder:
+                              AssetImage('assets/images/background_person.png'),
+                          image: NetworkImage(userDetails.image!),
+                          fit: BoxFit.cover,
+                          imageErrorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey,
+                              height: 120,
+                              width:
+                                  120, // Use the same width and height for CircleAvatar
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Image Error',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            );
+                          },
+                          placeholderErrorBuilder:
+                              (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.white,
+                              height: 120,
+                              width:
+                                  120, // Use the same width and height for CircleAvatar
+                              alignment: Alignment.center,
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 120,
+                      width: 120,
+                      child: LoadingRotating.square(
+                        borderColor: Colors.red,
+                        borderSize: 3.0,
+                        size: 60.0,
+                      ),
+                    )),
           title: Padding(
             padding: const EdgeInsets.only(top: 8, left: 8),
             child: Text(
@@ -282,8 +327,8 @@ class _BrandsSortState extends State<BrandsSort> {
             );
           },
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildImageErrorPlaceholder() {

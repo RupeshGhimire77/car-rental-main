@@ -8,4 +8,8 @@ abstract class UserService {
   Future<ApiResponse> checkUserData(User1 user);
   Future<ApiResponse> doesEmailExistOnSignUp(User1 user);
   Future<ApiResponse> doesMobileNumberExistOnSignUp(User1 user);
+
+  Future<ApiResponse> deleteUser(String id);
+
+  Future<ApiResponse> updateUserData(User1 user);
 }

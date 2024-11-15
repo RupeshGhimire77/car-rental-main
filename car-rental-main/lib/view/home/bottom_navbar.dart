@@ -3,6 +3,8 @@ import 'package:flutter_application_1/view/home/bottom%20nav%20bar/history.dart'
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/home_page.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/brands_sort.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/user_profile.dart';
+import 'package:flutter_application_1/view/home/user%20login/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -12,17 +14,31 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  List<Widget> widgetList = [
-    HomePage(),
-    History(),
-    UserProfile(),
-  ];
+  bool? isLogin = false;
+
+  getSharedPreference() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLoginStatus = prefs.getBool("isLogin");
+    setState(() {
+      isLogin = isLoginStatus ?? false;
+    });
+  }
+
+  List<Widget> getItemList() {
+    return [
+      HomePage(),
+      History(),
+      UserProfile(),
+      // isLogin == true ? HomePage() : HomePage(),
+    ];
+  }
+
   int selectIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widgetList[selectIndex],
+      body: getItemList()[selectIndex],
       bottomNavigationBar: BottomNavigationBar(
           onTap: (value) {
             setState(() {

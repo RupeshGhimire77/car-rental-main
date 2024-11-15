@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/model/user1.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
@@ -42,8 +43,9 @@ class _UserProfileState extends State<UserProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) => Scaffold(
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      final userDetails = userProvider.getUserByEmail(email);
+      return Scaffold(
         backgroundColor: Color(0xff771616),
         body: SingleChildScrollView(
           child: Column(
@@ -61,14 +63,22 @@ class _UserProfileState extends State<UserProfile> {
                   ),
                 ),
               ),
-              Center(
-                child: CircleAvatar(
-                  radius: 65,
-                  backgroundImage: AssetImage(
-                    "assets/images/background_person.png",
-                  ),
-                ),
-              ),
+              userDetails?.image != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: FadeInImage(
+                        placeholder:
+                            AssetImage('assets/images/placeholder.png'),
+                        image: NetworkImage(userDetails!.image!),
+                        height: 120,
+                        width: 180,
+                        fit: BoxFit.cover,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          return _buildImageErrorPlaceholder();
+                        },
+                      ),
+                    )
+                  : _buildImageErrorPlaceholder(),
               // if (user != null)
               Text(
                 name ?? "",
@@ -99,13 +109,20 @@ class _UserProfileState extends State<UserProfile> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                               side: BorderSide(color: Colors.red, width: 1))),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfile(),
-                          ),
-                        );
+                      onPressed: () async {
+                        List<QueryDocumentSnapshot> userEmail =
+                            await userProvider.getUsersWithEmail(email);
+
+                        if (userEmail.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfile(
+                                userData: userEmail[0],
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: Text(
                         "Edit Profile",
@@ -157,8 +174,8 @@ class _UserProfileState extends State<UserProfile> {
             ],
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   logout() async {
@@ -228,6 +245,19 @@ class _UserProfileState extends State<UserProfile> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildImageErrorPlaceholder() {
+    return Container(
+      color: Colors.grey,
+      height: 120,
+      width: 180,
+      alignment: Alignment.center,
+      child: Text(
+        'Image Error',
+        style: TextStyle(color: Colors.white),
+      ),
     );
   }
 }

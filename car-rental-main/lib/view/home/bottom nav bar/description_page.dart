@@ -17,9 +17,11 @@ import 'package:flutter_application_1/utils/helper.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animations/loading_animations.dart';
 import 'package:nepali_date_picker/nepali_date_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class DescriptionPage extends StatefulWidget {
   final Car? car;
@@ -126,579 +128,643 @@ class _DescriptionPageState extends State<DescriptionPage> {
   Widget build(BuildContext context) {
     List<String> allPlaces =
         Provider.of<BookCarProvider>(context, listen: false).getAllPlaces();
-    return Scaffold(
-        backgroundColor: Color(0xff771616),
-        appBar: AppBar(
-          toolbarHeight: 60,
-          backgroundColor: Color(0xFF771616),
-          leading: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 20),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage:
-                  AssetImage("assets/images/background_person.png"),
-            ),
-          ),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 8),
-            child: Text(
-              name ?? "no name",
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            child:
-                Consumer<CarProvider>(builder: (context, carProvider, child) {
-              return Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * .3,
-                    width: MediaQuery.of(context).size.width * .9,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(widget.car?.image ?? ''),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white.withOpacity(0.2),
-                    ),
-                    height: MediaQuery.of(context).size.height * .3,
-                    width: MediaQuery.of(context).size.width * .9,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Model: ${widget.car?.model ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                              Text(
-                                "Year: ${widget.car?.year ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Vehical Type: ${widget.car?.vehicleType ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                              Text(
-                                "Fuel Type: ${widget.car?.fuelType ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Seating Capacity: ${widget.car?.seatingCapacity ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                              Text(
-                                "Mileage: ${widget.car?.mileage ?? ""}",
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 20),
-                              ),
-                            ],
-                          ),
-                          // Text(
-                          //   "TransmissionType: Dont know",
-                          //   style: TextStyle(color: Colors.white, fontSize: 20),
-                          // ),
-                          Text(
-                            "Brand: ${widget.car?.brand ?? ""}",
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "Rental Price: Rs. ${widget.car?.rentalPrice ?? ""}/day",
-                                    style: TextStyle(
-                                        color: Colors.yellow, fontSize: 24),
+    return Consumer<UserProvider>(builder: (context, userProvider, child) {
+      final userDetails = userProvider.getUserByEmail(email);
+
+      return Scaffold(
+          backgroundColor: Color(0xff771616),
+          appBar: AppBar(
+            toolbarHeight: 60,
+            backgroundColor: Color(0xFF771616),
+            leading: Padding(
+                padding: const EdgeInsets.only(top: 8, left: 20),
+                child: userDetails?.image != null &&
+                        userDetails!.image!.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 60, // Adjust the radius as needed
+                        backgroundColor:
+                            Colors.grey, // Background color while loading
+                        child: ClipOval(
+                          child: FadeInImage(
+                            placeholder: AssetImage(
+                                'assets/images/background_person.png'),
+                            image: NetworkImage(userDetails.image!),
+                            fit: BoxFit.cover,
+                            imageErrorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey,
+                                height: 120,
+                                width:
+                                    120, // Use the same width and height for CircleAvatar
+                                alignment: Alignment.center,
+                                child: Text(
+                                  'Image Error',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: Colors.white,
                                   ),
                                 ),
-                                Text(
-                                  "Status: ${widget.car?.availableStatus ?? ""}",
-                                  style: TextStyle(
-                                      color: Colors.yellow, fontSize: 24),
-                                ),
-                              ],
-                            ),
+                              );
+                            },
+                            placeholderErrorBuilder:
+                                (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.white,
+                                height: 120,
+                                width:
+                                    120, // Use the same width and height for CircleAvatar
+                                alignment: Alignment.center,
+                              );
+                            },
                           ),
-                        ],
+                        ),
+                      )
+                    : Container(
+                        height: 120,
+                        width: 120,
+                        child: LoadingRotating.square(
+                          borderColor: Colors.red,
+                          borderSize: 3.0,
+                          size: 60.0,
+                        ),
+                      )),
+            title: Padding(
+              padding: const EdgeInsets.only(top: 8, left: 8),
+              child: Text(
+                name ?? "no name",
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
+          body: Center(
+            child: SingleChildScrollView(
+              child:
+                  Consumer<CarProvider>(builder: (context, carProvider, child) {
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .3,
+                      width: MediaQuery.of(context).size.width * .9,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(widget.car?.image ?? ''),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
-                    child: Container(
-                      color: Color(0xff181A1B),
-                      height: MediaQuery.of(context).size.height * .68,
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withOpacity(0.2),
+                      ),
+                      height: MediaQuery.of(context).size.height * .3,
                       width: MediaQuery.of(context).size.width * .9,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 10, left: 15),
-                        child: Consumer2<BookCarProvider, UserProvider>(
-                          builder:
-                              (context, bookCarProvider, userProvider, child) =>
-                                  Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Pick up Point",
-                                  style: TextStyle(
-                                      color: Color(0xffC3BEB6), fontSize: 16)),
-                              Autocomplete<String>(
-                                optionsBuilder:
-                                    (TextEditingValue textEditingValue) {
-                                  if (textEditingValue.text.isEmpty) {
-                                    return const Iterable<String>.empty();
-                                  }
-                                  return allPlaces.where((place) => place
-                                      .toLowerCase()
-                                      .contains(
-                                          textEditingValue.text.toLowerCase()));
-                                },
-                                onSelected: (String selection) {
-                                  bookCarProvider.setPickUpPoint(selection);
-                                },
-                                fieldViewBuilder: (BuildContext context,
-                                    TextEditingController textEditingController,
-                                    FocusNode focusNode,
-                                    VoidCallback onFieldSubmitted) {
-                                  return CustomLocationTextfield(
-                                    hintText: "Pick up Location",
-                                    controller: textEditingController,
-                                    focusNode: focusNode,
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 20),
-                              Text("Destination Point",
-                                  style: TextStyle(
-                                      color: Color(0xffC3BEB6), fontSize: 16)),
-                              TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                    hintStyle:
-                                        TextStyle(color: Color(0xff7B776D)),
-                                    hintText: "Banepa, Godamchwok",
-                                    suffixIcon: Icon(Icons.location_on)),
-                              ),
-                              // Autocomplete<String>(
-                              //   optionsBuilder:
-                              //       (TextEditingValue textEditingValue) {
-                              //     if (textEditingValue.text.isEmpty) {
-                              //       return const Iterable<String>.empty();
-                              //     }
-                              //     return allPlaces.where((place) => place
-                              //         .toLowerCase()
-                              //         .contains(
-                              //             textEditingValue.text.toLowerCase()));
-                              //   },
-                              //   onSelected: (String selection) {
-                              //     bookCarProvider.setDestinationPoint(selection);
-                              //   },
-                              //   fieldViewBuilder: (BuildContext context,
-                              //       TextEditingController textEditingController,
-                              //       FocusNode focusNode,
-                              //       VoidCallback onFieldSubmitted) {
-                              //     return CustomLocationTextfield(
-                              //       // enabled: false,
-                              //       hintText: "Banepa, Godamchwok",
-                              //       controller: textEditingController,
-                              //       focusNode: focusNode,
-                              //       readOnly: true,
-                              //     );
-                              //   },
-                              // ),
-                              Center(
-                                child: Text(
-                                  "You can't change the destination location.",
-                                  style: TextStyle(
-                                      color: Colors.orangeAccent, fontSize: 12),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Start Date",
-                                          style: TextStyle(
-                                            color: Color(0xffC3BEB6),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async =>
-                                              await _selectStartDate(context),
-                                          child: AbsorbPointer(
-                                            child: CustomBookTextfield(
-                                              controller: _startDateController,
-                                              hintText: "Start Date",
-                                              suffixIcon: IconButton(
-                                                onPressed: () async {
-                                                  await _selectStartDate(
-                                                      context);
-                                                },
-                                                icon: Icon(
-                                                  Icons.calendar_month,
-                                                  color: Color(0xff7B776D),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "End Date",
-                                          style: TextStyle(
-                                            color: Color(0xffC3BEB6),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async =>
-                                              await _selectEndDate(context),
-                                          child: AbsorbPointer(
-                                            child: CustomBookTextfield(
-                                              controller: _endDateController,
-                                              hintText: "End Date",
-                                              suffixIcon: IconButton(
-                                                onPressed: () async {
-                                                  await _selectEndDate(context);
-                                                },
-                                                icon: Icon(
-                                                  Icons.calendar_month,
-                                                  color: Color(0xff7B776D),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Pick up Time",
-                                          style: TextStyle(
-                                            color: Color(0xffC3BEB6),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async =>
-                                              await _selectPickUpTime(context),
-                                          child: AbsorbPointer(
-                                            child: CustomBookTextfield(
-                                              controller: bookCarProvider
-                                                  .pickUpTimeController,
-                                              suffixIcon: IconButton(
-                                                onPressed: () async {
-                                                  await _selectPickUpTime(
-                                                      context); // Call pick up time function
-                                                },
-                                                icon: Icon(
-                                                  Icons.watch_later_outlined,
-                                                  color: Color(0xff7B776D),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Drop Time",
-                                          style: TextStyle(
-                                            color: Color(0xffC3BEB6),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async =>
-                                              await _selectDropTime(context),
-                                          child: AbsorbPointer(
-                                            child: CustomBookTextfield(
-                                              controller: bookCarProvider
-                                                  .dropTimeController,
-                                              // controller:
-                                              //     _dropTimeController, // Link the controller
-                                              suffixIcon:
-                                                  // IconButton(
-                                                  //   onPressed: () async {
-                                                  //     await _selectDropTime(
-                                                  //         context); // Call drop time function
-                                                  //   },icon:
-                                                  Icon(
-                                                Icons.watch_later_outlined,
-                                                color: Color(0xff7B776D),
-                                              ),
-                                              // ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: Text(
-                                  "Please select your driving License before booking.",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Center(
-                                    child: SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.17,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.4,
-                                      child: file.path.isNotEmpty
-                                          ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image.file(
-                                                file,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            )
-                                          : (downloadUrl != null)
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  child: Image.network(
-                                                    downloadUrl!,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  child: Image.asset(
-                                                    "assets/images/background.png",
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 60),
-                                      child: CustomBookButton(
-                                          onPressed: () {
-                                            pickImage();
-                                          },
-                                          child: loader == true
-                                              ? CircularProgressIndicator()
-                                              : Text(
-                                                  "Upload Driving License",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 16),
-                                                )),
-                                    ),
-                                  ),
-                                  if (downloadUrl != null)
-                                    Visibility(
-                                      visible: false,
-                                      child: CustomTextFormField(
-                                        controller: bookCarProvider
-                                            .setBookCarImage(downloadUrl!),
-                                        labelText: "Car Image",
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              CustomBookButton(
-                                onPressed: () async {
-                                  if (bookCarProvider
-                                          .pickUpPointController.text.isEmpty ||
-                                      bookCarProvider
-                                          .startDateController.text.isEmpty ||
-                                      bookCarProvider
-                                          .endDateController.text.isEmpty ||
-                                      bookCarProvider
-                                          .pickUpTimeController.text.isEmpty ||
-                                      bookCarProvider
-                                          .dropTimeController.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Please fill in all fields')),
-                                    );
-                                    return;
-                                  }
-
-                                  // Set booking details in the provider before payment
-                                  bookCarProvider
-                                      .setStartDate(_startDateController.text);
-                                  bookCarProvider
-                                      .setEndDate(_endDateController.text);
-                                  bookCarProvider.setPickUpTime(bookCarProvider
-                                      .pickUpTimeController.text);
-                                  bookCarProvider.setDropTime(
-                                      bookCarProvider.dropTimeController.text);
-
-                                  // Show the payment UI first
-                                  // final paymentSuccessful = await StripeService
-                                  //     .instance
-                                  //     .makePayment(context, widget.car!, email!);
-
-                                  // Only proceed to save booking if payment was successful
-                                  // if (paymentSuccessful) {
-                                  await bookCarProvider.saveBookCar(
-                                      email: email, id: widget.car?.id);
-
-                                  if (bookCarProvider.isSuccess &&
-                                      bookCarProvider.saveBookCarStatus ==
-                                          StatusUtil.success) {
-                                    Helper.displaySnackBar(context,
-                                        "Successfully Booked the car.");
-                                    Navigator.pop(context);
-                                  } else {
-                                    Helper.displaySnackBar(
-                                        context, "Couldn't book the car.");
-                                  }
-                                  // } else {
-                                  //   Helper.displaySnackBar(context,
-                                  //       "Payment failed. Booking was not saved.");
-                                  // }
-
-                                  setState(() {});
-                                },
-                                child: Text(
-                                  "Book Now",
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Model: ${widget.car?.model ?? ""}",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 20),
                                 ),
-                              )
-                            ],
+                                Text(
+                                  "Year: ${widget.car?.year ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Vehical Type: ${widget.car?.vehicleType ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                Text(
+                                  "Fuel Type: ${widget.car?.fuelType ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Seating Capacity: ${widget.car?.seatingCapacity ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                                Text(
+                                  "Mileage: ${widget.car?.mileage ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20),
+                                ),
+                              ],
+                            ),
+                            // Text(
+                            //   "TransmissionType: Dont know",
+                            //   style: TextStyle(color: Colors.white, fontSize: 20),
+                            // ),
+                            Text(
+                              "Brand: ${widget.car?.brand ?? ""}",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      "Rental Price: Rs. ${widget.car?.rentalPrice ?? ""}/day",
+                                      style: TextStyle(
+                                          color: Colors.yellow, fontSize: 24),
+                                    ),
+                                  ),
+                                  Text(
+                                    "Status: ${widget.car?.availableStatus ?? ""}",
+                                    style: TextStyle(
+                                        color: Colors.yellow, fontSize: 24),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 20),
+                      child: Container(
+                        color: Color(0xff181A1B),
+                        height: MediaQuery.of(context).size.height * .68,
+                        width: MediaQuery.of(context).size.width * .9,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10, left: 15),
+                          child: Consumer2<BookCarProvider, UserProvider>(
+                            builder: (context, bookCarProvider, userProvider,
+                                    child) =>
+                                Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Pick up Point",
+                                    style: TextStyle(
+                                        color: Color(0xffC3BEB6),
+                                        fontSize: 16)),
+                                Autocomplete<String>(
+                                  optionsBuilder:
+                                      (TextEditingValue textEditingValue) {
+                                    if (textEditingValue.text.isEmpty) {
+                                      return const Iterable<String>.empty();
+                                    }
+                                    return allPlaces.where((place) => place
+                                        .toLowerCase()
+                                        .contains(textEditingValue.text
+                                            .toLowerCase()));
+                                  },
+                                  onSelected: (String selection) {
+                                    bookCarProvider.setPickUpPoint(selection);
+                                  },
+                                  fieldViewBuilder: (BuildContext context,
+                                      TextEditingController
+                                          textEditingController,
+                                      FocusNode focusNode,
+                                      VoidCallback onFieldSubmitted) {
+                                    return CustomLocationTextfield(
+                                      hintText: "Pick up Location",
+                                      controller: textEditingController,
+                                      focusNode: focusNode,
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 20),
+                                Text("Destination Point",
+                                    style: TextStyle(
+                                        color: Color(0xffC3BEB6),
+                                        fontSize: 16)),
+                                TextFormField(
+                                  readOnly: true,
+                                  decoration: InputDecoration(
+                                      hintStyle:
+                                          TextStyle(color: Color(0xff7B776D)),
+                                      hintText: "Banepa, Godamchwok",
+                                      suffixIcon: Icon(Icons.location_on)),
+                                ),
+                                // Autocomplete<String>(
+                                //   optionsBuilder:
+                                //       (TextEditingValue textEditingValue) {
+                                //     if (textEditingValue.text.isEmpty) {
+                                //       return const Iterable<String>.empty();
+                                //     }
+                                //     return allPlaces.where((place) => place
+                                //         .toLowerCase()
+                                //         .contains(
+                                //             textEditingValue.text.toLowerCase()));
+                                //   },
+                                //   onSelected: (String selection) {
+                                //     bookCarProvider.setDestinationPoint(selection);
+                                //   },
+                                //   fieldViewBuilder: (BuildContext context,
+                                //       TextEditingController textEditingController,
+                                //       FocusNode focusNode,
+                                //       VoidCallback onFieldSubmitted) {
+                                //     return CustomLocationTextfield(
+                                //       // enabled: false,
+                                //       hintText: "Banepa, Godamchwok",
+                                //       controller: textEditingController,
+                                //       focusNode: focusNode,
+                                //       readOnly: true,
+                                //     );
+                                //   },
+                                // ),
+                                Center(
+                                  child: Text(
+                                    "You can't change the destination location.",
+                                    style: TextStyle(
+                                        color: Colors.orangeAccent,
+                                        fontSize: 12),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Start Date",
+                                            style: TextStyle(
+                                              color: Color(0xffC3BEB6),
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async =>
+                                                await _selectStartDate(context),
+                                            child: AbsorbPointer(
+                                              child: CustomBookTextfield(
+                                                controller:
+                                                    _startDateController,
+                                                hintText: "Start Date",
+                                                suffixIcon: IconButton(
+                                                  onPressed: () async {
+                                                    await _selectStartDate(
+                                                        context);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.calendar_month,
+                                                    color: Color(0xff7B776D),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "End Date",
+                                            style: TextStyle(
+                                              color: Color(0xffC3BEB6),
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async =>
+                                                await _selectEndDate(context),
+                                            child: AbsorbPointer(
+                                              child: CustomBookTextfield(
+                                                controller: _endDateController,
+                                                hintText: "End Date",
+                                                suffixIcon: IconButton(
+                                                  onPressed: () async {
+                                                    await _selectEndDate(
+                                                        context);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.calendar_month,
+                                                    color: Color(0xff7B776D),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Pick up Time",
+                                            style: TextStyle(
+                                              color: Color(0xffC3BEB6),
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async =>
+                                                await _selectPickUpTime(
+                                                    context),
+                                            child: AbsorbPointer(
+                                              child: CustomBookTextfield(
+                                                controller: bookCarProvider
+                                                    .pickUpTimeController,
+                                                suffixIcon: IconButton(
+                                                  onPressed: () async {
+                                                    await _selectPickUpTime(
+                                                        context); // Call pick up time function
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.watch_later_outlined,
+                                                    color: Color(0xff7B776D),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Drop Time",
+                                            style: TextStyle(
+                                              color: Color(0xffC3BEB6),
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () async =>
+                                                await _selectDropTime(context),
+                                            child: AbsorbPointer(
+                                              child: CustomBookTextfield(
+                                                controller: bookCarProvider
+                                                    .dropTimeController,
+                                                // controller:
+                                                //     _dropTimeController, // Link the controller
+                                                suffixIcon:
+                                                    // IconButton(
+                                                    //   onPressed: () async {
+                                                    //     await _selectDropTime(
+                                                    //         context); // Call drop time function
+                                                    //   },icon:
+                                                    Icon(
+                                                  Icons.watch_later_outlined,
+                                                  color: Color(0xff7B776D),
+                                                ),
+                                                // ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: Text(
+                                    "Please select your driving License before booking.",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Center(
+                                      child: SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.17,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.4,
+                                        child: file.path.isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Image.file(
+                                                  file,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              )
+                                            : (downloadUrl != null)
+                                                ? ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    child: Image.network(
+                                                      downloadUrl!,
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  )
+                                                : ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                    child: Image.asset(
+                                                      "assets/images/background.png",
+                                                      fit: BoxFit.contain,
+                                                    ),
+                                                  ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 60),
+                                        child: CustomBookButton(
+                                            onPressed: () {
+                                              pickImage();
+                                            },
+                                            child: loader == true
+                                                ? CircularProgressIndicator()
+                                                : Text(
+                                                    "Upload Driving License",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16),
+                                                  )),
+                                      ),
+                                    ),
+                                    if (downloadUrl != null)
+                                      Visibility(
+                                        visible: false,
+                                        child: CustomTextFormField(
+                                          controller: bookCarProvider
+                                              .setBookCarImage(downloadUrl!),
+                                          labelText: "Car Image",
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                CustomBookButton(
+                                  onPressed: () async {
+                                    if (bookCarProvider.pickUpPointController
+                                            .text.isEmpty ||
+                                        bookCarProvider
+                                            .startDateController.text.isEmpty ||
+                                        bookCarProvider
+                                            .endDateController.text.isEmpty ||
+                                        bookCarProvider.pickUpTimeController
+                                            .text.isEmpty ||
+                                        bookCarProvider
+                                            .dropTimeController.text.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Please fill in all fields')),
+                                      );
+                                      return;
+                                    }
+
+                                    // Set booking details in the provider before payment
+                                    bookCarProvider.setStartDate(
+                                        _startDateController.text);
+                                    bookCarProvider
+                                        .setEndDate(_endDateController.text);
+                                    bookCarProvider.setPickUpTime(
+                                        bookCarProvider
+                                            .pickUpTimeController.text);
+                                    bookCarProvider.setDropTime(bookCarProvider
+                                        .dropTimeController.text);
+
+                                    // Show the payment UI first
+                                    // final paymentSuccessful = await StripeService
+                                    //     .instance
+                                    //     .makePayment(context, widget.car!, email!);
+
+                                    // Only proceed to save booking if payment was successful
+                                    // if (paymentSuccessful) {
+                                    await bookCarProvider.saveBookCar(
+                                        email: email, id: widget.car?.id);
+
+                                    if (bookCarProvider.isSuccess &&
+                                        bookCarProvider.saveBookCarStatus ==
+                                            StatusUtil.success) {
+                                      Helper.displaySnackBar(context,
+                                          "Successfully Booked the car.");
+                                      Navigator.pop(context);
+                                    } else {
+                                      Helper.displaySnackBar(
+                                          context, "Couldn't book the car.");
+                                    }
+                                    // } else {
+                                    //   Helper.displaySnackBar(context,
+                                    //       "Payment failed. Booking was not saved.");
+                                    // }
+
+                                    setState(() {});
+                                  },
+                                  child: Text(
+                                    "Book Now",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20),
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Consumer2<RatingProvider, BookCarProvider>(
-                    builder: (context, ratingProvider, bookCarProvider, child) {
-                      ratingProvider.loadUserRating(widget.car!.id!,
-                          email!); // Ensure this is called once on load
-                      return ratingProvider.isRated == true
-                          ? Column(
-                              children: [
-                                Text(
-                                  "You have rated this car:",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
+                    Consumer2<RatingProvider, BookCarProvider>(
+                      builder:
+                          (context, ratingProvider, bookCarProvider, child) {
+                        ratingProvider.loadUserRating(widget.car!.id!,
+                            email!); // Ensure this is called once on load
+                        return ratingProvider.isRated == true
+                            ? Column(
+                                children: [
+                                  Text(
+                                    "You have rated this car:",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24,
+                                    ),
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    RatingBar.builder(
-                                      initialRating: double.parse(
-                                          ratingProvider.ratingController.text),
-                                      minRating: 1,
-                                      direction: Axis.horizontal,
-                                      allowHalfRating: true,
-                                      itemCount: 5,
-                                      itemBuilder: (context, _) => Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      RatingBar.builder(
+                                        initialRating: double.parse(
+                                            ratingProvider
+                                                .ratingController.text),
+                                        minRating: 1,
+                                        direction: Axis.horizontal,
+                                        allowHalfRating: true,
+                                        itemCount: 5,
+                                        itemBuilder: (context, _) => Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                        ),
+                                        onRatingUpdate: (_) {},
+                                        ignoreGestures: true,
                                       ),
-                                      onRatingUpdate: (_) {},
-                                      ignoreGestures: true,
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text(
-                                      "(${averageRating.toStringAsFixed(1)}/5) $numberOfRatings",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 18),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            )
-                          : _buildRatingForm(ratingProvider, bookCarProvider);
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  )
-                ],
-              );
-            }),
-          ),
-        ));
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(
+                                        "(${averageRating.toStringAsFixed(1)}/5) $numberOfRatings",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              )
+                            : _buildRatingForm(ratingProvider, bookCarProvider);
+                      },
+                    ),
+                    SizedBox(
+                      height: 10,
+                    )
+                  ],
+                );
+              }),
+            ),
+          ));
+    });
   }
 
   Widget _buildRatingForm(
