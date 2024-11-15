@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/api_response.dart';
 import 'package:flutter_application_1/model/book_car.dart';
@@ -379,5 +380,17 @@ class BookCarProvider extends ChangeNotifier {
       errorMessage = response.data;
       setIsPaidBookingStatus(StatusUtil.error);
     }
+  }
+
+  Future<List<QueryDocumentSnapshot>> getPaidBookings(
+      String? email, String? carId) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("bookCar")
+        .where("carId", isEqualTo: carId)
+        .where("email", isEqualTo: email)
+        .where("isPaid", isEqualTo: true)
+        .get();
+
+    return snapshot.docs;
   }
 }

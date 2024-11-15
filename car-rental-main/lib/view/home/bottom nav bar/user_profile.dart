@@ -64,7 +64,9 @@ class _UserProfileState extends State<UserProfile> {
               Center(
                 child: CircleAvatar(
                   radius: 65,
-                  backgroundImage: AssetImage("assets/images/Jackie-Chan.jpeg"),
+                  backgroundImage: AssetImage(
+                    "assets/images/background_person.png",
+                  ),
                 ),
               ),
               // if (user != null)

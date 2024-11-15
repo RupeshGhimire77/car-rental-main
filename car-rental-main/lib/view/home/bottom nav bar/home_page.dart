@@ -231,7 +231,8 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(top: 8, left: 20),
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage("assets/images/Jackie-Chan.jpeg"),
+                backgroundImage:
+                    AssetImage("assets/images/background_person.png"),
 
                 // backgroundColor: Colors.transparent,
               ),
@@ -415,26 +416,79 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 brandProvider.brandList[index].brandImage !=
                                         null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: FadeInImage(
-                                          placeholder: AssetImage(
-                                              'assets/images/placeholder.png'),
-                                          image: NetworkImage(brandProvider
-                                              .brandList[index].brandImage!),
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.125, // Adjusted to fit within container
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
-                                          imageErrorBuilder:
-                                              (context, error, stackTrace) {
-                                            return _buildImageErrorPlaceholder();
-                                          },
-                                        ),
+                                    ? Row(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadiusDirectional
+                                                    .circular(10),
+                                            child: FadeInImage(
+                                              placeholder: AssetImage(
+                                                  'assets/images/placeholder.png'), // Use an asset image placeholder or use `Shimmer` widget here
+                                              image: NetworkImage(brandProvider
+                                                  .brandList[index]
+                                                  .brandImage!),
+                                              height: 112,
+                                              width: 140,
+                                              fit: BoxFit.contain,
+                                              imageErrorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return Shimmer.fromColors(
+                                                  baseColor: Colors.red,
+                                                  highlightColor: Colors.yellow,
+                                                  child: Container(
+                                                    color: Colors.grey,
+                                                    height: 112,
+                                                    width: 140,
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      'Image Error',
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        fontSize: 20.0,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              placeholderErrorBuilder:
+                                                  (context, error, stackTrace) {
+                                                return Shimmer.fromColors(
+                                                  baseColor:
+                                                      Colors.deepPurple[300]!,
+                                                  highlightColor:
+                                                      Colors.deepPurple[100]!,
+                                                  child: Container(
+                                                    color: Colors.white,
+                                                    height: 112,
+                                                    width: 147,
+                                                    alignment: Alignment.center,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       )
-                                    : _buildImageErrorPlaceholder()
+                                    : Shimmer.fromColors(
+                                        baseColor: Colors.red,
+                                        highlightColor: Colors.yellow,
+                                        child: Container(
+                                          height: 112,
+                                          width: 140,
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            'Shimmer',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 40.0,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                               ],
                             ),
                           ),
@@ -567,14 +621,30 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Text(car.model!),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text("Rs. " + car.rentalPrice! + "/day"),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text("Rs. " + car.rentalPrice! + "/day"),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Container(
+                      width: 70,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: Colors.orange.withOpacity(0.5)),
+                      // color: Colors.orange.withOpacity(0.5),
+                      child: Center(child: Text("${car.availableStatus}")),
+                    ),
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(car.availableStatus!),
-              )
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 8.0),
+              //   child: Text(car.availableStatus!),
+              // )
             ],
           ),
         ),

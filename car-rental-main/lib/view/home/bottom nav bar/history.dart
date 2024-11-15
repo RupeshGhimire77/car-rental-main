@@ -91,7 +91,7 @@ class _HistoryState extends State<History> {
           padding: const EdgeInsets.only(top: 8, left: 20),
           child: CircleAvatar(
             radius: 50,
-            backgroundImage: AssetImage("assets/images/Jackie-Chan.jpeg"),
+            backgroundImage: AssetImage("assets/images/background_person.png"),
 
             // backgroundColor: Colors.transparent,
           ),
@@ -471,6 +471,15 @@ class _HistoryState extends State<History> {
                                           color: Colors.redAccent,
                                           fontWeight: FontWeight.bold),
                                     ),
+                                  ),
+                                  Container(
+                                    width: 70,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Colors.orange.withOpacity(0.5)),
+                                    // color: Colors.orange.withOpacity(0.5),
+                                    child: Center(
+                                        child: Text("${car.availableStatus}")),
                                   )
                                 ],
                               ),

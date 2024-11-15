@@ -36,6 +36,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
   // TextEditingController emailController = TextEditingController();
 
   void initState() {
+    super.initState();
     getValue();
     getCarData();
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -43,10 +44,11 @@ class _DescriptionPageState extends State<DescriptionPage> {
     //   provider.loadUserRating(
     //       widget.car!.id!, email!); // Ensure this is called once on load
     // });
-
-    _fetchCarRating();
-    _selectedStartDate = NepaliDateTime.now();
-    _startDateController.text = _formatNepaliDate(_selectedStartDate!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchCarRating();
+      _selectedStartDate = NepaliDateTime.now();
+      _startDateController.text = _formatNepaliDate(_selectedStartDate!);
+    });
   }
 
   Future<void> _fetchCarRating() async {
@@ -54,9 +56,11 @@ class _DescriptionPageState extends State<DescriptionPage> {
     Map<String, dynamic> ratingDetails =
         await ratingProvider.getCarRatingDetails(widget.car!.id!);
 
-    setState(() {
-      averageRating = ratingDetails['averageRating'];
-      numberOfRatings = ratingDetails['numberOfRatings'];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        averageRating = ratingDetails['averageRating'];
+        numberOfRatings = ratingDetails['numberOfRatings'];
+      });
     });
   }
 
@@ -82,7 +86,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
   getValue() {
     Future.delayed(Duration.zero, () async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var provider = Provider.of<BookCarProvider>(context, listen: false);
+      // var provider = Provider.of<BookCarProvider>(context, listen: false);
       setState(() {
         name = prefs.getString("name");
         email = prefs.getString("email");
@@ -131,37 +135,24 @@ class _DescriptionPageState extends State<DescriptionPage> {
             padding: const EdgeInsets.only(top: 8, left: 20),
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage("assets/images/Jackie-Chan.jpeg"),
-
-              // backgroundColor: Colors.transparent,
+              backgroundImage:
+                  AssetImage("assets/images/background_person.png"),
             ),
           ),
           title: Padding(
             padding: const EdgeInsets.only(top: 8, left: 8),
             child: Text(
               name ?? "no name",
-              // "",
               style:
                   TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
-          actions: [
-            // Padding(
-            //   padding: const EdgeInsets.only(right: 20, top: 8),
-            //   child: IconButton(
-            //       onPressed: () {},
-            //       icon: Icon(
-            //         Icons.notifications_active,
-            //         color: Colors.white,
-            //         size: 27.5,
-            //       )),
-            // )
-          ],
         ),
         body: Center(
           child: SingleChildScrollView(
-            child: Consumer<CarProvider>(
-              builder: (context, carProvider, child) => Column(
+            child:
+                Consumer<CarProvider>(builder: (context, carProvider, child) {
+              return Column(
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * .3,
@@ -243,13 +234,22 @@ class _DescriptionPageState extends State<DescriptionPage> {
                               borderRadius: BorderRadius.circular(20),
                               color: Colors.white.withOpacity(0.2),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                "Rental Price: Rs. ${widget.car?.rentalPrice ?? ""}/day",
-                                style: TextStyle(
-                                    color: Colors.yellow, fontSize: 30),
-                              ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Rental Price: Rs. ${widget.car?.rentalPrice ?? ""}/day",
+                                    style: TextStyle(
+                                        color: Colors.yellow, fontSize: 24),
+                                  ),
+                                ),
+                                Text(
+                                  "Status: ${widget.car?.availableStatus ?? ""}",
+                                  style: TextStyle(
+                                      color: Colors.yellow, fontSize: 24),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -644,8 +644,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
                       ),
                     ),
                   ),
-                  Consumer<RatingProvider>(
-                    builder: (context, ratingProvider, child) {
+                  Consumer2<RatingProvider, BookCarProvider>(
+                    builder: (context, ratingProvider, bookCarProvider, child) {
                       ratingProvider.loadUserRating(widget.car!.id!,
                           email!); // Ensure this is called once on load
                       return ratingProvider.isRated == true
@@ -688,20 +688,21 @@ class _DescriptionPageState extends State<DescriptionPage> {
                                 ),
                               ],
                             )
-                          : _buildRatingForm(ratingProvider);
+                          : _buildRatingForm(ratingProvider, bookCarProvider);
                     },
                   ),
                   SizedBox(
                     height: 10,
                   )
                 ],
-              ),
-            ),
+              );
+            }),
           ),
         ));
   }
 
-  Widget _buildRatingForm(RatingProvider ratingProvider) {
+  Widget _buildRatingForm(
+      RatingProvider ratingProvider, BookCarProvider bookCarProvider) {
     return Form(
       key: _formKey,
       child: Column(
@@ -745,25 +746,43 @@ class _DescriptionPageState extends State<DescriptionPage> {
             child: CustomBookButton(
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  await ratingProvider.saveRating(
-                    email: email,
-                    id: widget.car?.id,
-                  );
-                  if (ratingProvider.saveRatingStatus == StatusUtil.success) {
-                    Helper.displaySnackBar(context, "Rating Successful!");
-                    // Navigator.pushAndRemoveUntil(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => DescriptionPage(
-                    //       car: widget.car,
-                    //     ),
-                    //   ),
-                    //   (route) => false,
-                    // );
-                  } else if (ratingProvider.saveRatingStatus ==
-                      StatusUtil.error) {
-                    Helper.displaySnackBar(context,
-                        ratingProvider.errorMessage ?? "Error rating the car.");
+                  List<QueryDocumentSnapshot> paidBookings =
+                      await bookCarProvider.getPaidBookings(
+                          email, widget.car?.id);
+
+                  bool hasPaidBooking = false;
+
+                  for (var booking in paidBookings) {
+                    Map<String, dynamic> bookingData =
+                        booking.data() as Map<String, dynamic>;
+
+                    bool isPaid = bookingData['isPaid'] ?? false;
+
+                    if (isPaid) {
+                      hasPaidBooking = true; // Mark that a paid booking exists
+                      await ratingProvider.saveRating(
+                        email: email,
+                        id: widget.car?.id,
+                      );
+
+                      if (ratingProvider.saveRatingStatus ==
+                          StatusUtil.success) {
+                        Helper.displaySnackBar(context, "Rating Successful!");
+                      } else if (ratingProvider.saveRatingStatus ==
+                          StatusUtil.error) {
+                        Helper.displaySnackBar(
+                            context,
+                            ratingProvider.errorMessage ??
+                                "Error rating the car.");
+                      }
+                      break; // Stop further iteration once a paid booking is found
+                    }
+                  }
+
+                  if (!hasPaidBooking) {
+                    // Only display this if no paid booking was found
+                    Helper.displaySnackBar(
+                        context, "You have not rented this car.");
                   }
                 }
               },
