@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/history.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/home.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/home_page.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/brands_sort.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/user_profile.dart';
@@ -26,9 +27,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   List<Widget> getItemList() {
     return [
-      HomePage(),
+      Home(),
       History(),
       UserProfile(),
+      // HomePage()
       // isLogin == true ? HomePage() : HomePage(),
     ];
   }
@@ -40,6 +42,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: getItemList()[selectIndex],
       bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
           onTap: (value) {
             setState(() {
               selectIndex = value;
@@ -51,7 +55,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.history), label: "History"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.person_pin_circle), label: "Profile")
+                icon: Icon(Icons.person_pin_circle), label: "Profile"),
+            // BottomNavigationBarItem(icon: Icon(Icons.home), label: "home")
           ]),
     );
   }

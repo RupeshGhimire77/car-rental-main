@@ -72,8 +72,8 @@ class _DescriptionPageState extends State<DescriptionPage> {
   NepaliDateTime? _selectedStartDate = NepaliDateTime.now();
   NepaliDateTime? _selectedEndDate;
 
-  TimeOfDay? _selectedPickUpTime;
-  TimeOfDay? _selectedDropTime;
+  // TimeOfDay? _selectedPickUpTime;
+  // TimeOfDay? _selectedDropTime;
 
   TextEditingController _pickUpTimeController = TextEditingController();
   TextEditingController _dropTimeController = TextEditingController();
@@ -124,80 +124,20 @@ class _DescriptionPageState extends State<DescriptionPage> {
 
   bool loader = false;
 
+  TextStyle normalText =
+      TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+  Color? white = Colors.white;
+
   @override
   Widget build(BuildContext context) {
     List<String> allPlaces =
         Provider.of<BookCarProvider>(context, listen: false).getAllPlaces();
     return Consumer<UserProvider>(builder: (context, userProvider, child) {
-      final userDetails = userProvider.getUserByEmail(email);
+      // final userDetails = userProvider.getUserByEmail(email);
 
       return Scaffold(
           backgroundColor: Color(0xff771616),
-          appBar: AppBar(
-            toolbarHeight: 60,
-            backgroundColor: Color(0xFF771616),
-            leading: Padding(
-                padding: const EdgeInsets.only(top: 8, left: 20),
-                child: userDetails?.image != null &&
-                        userDetails!.image!.isNotEmpty
-                    ? CircleAvatar(
-                        radius: 60, // Adjust the radius as needed
-                        backgroundColor:
-                            Colors.grey, // Background color while loading
-                        child: ClipOval(
-                          child: FadeInImage(
-                            placeholder: AssetImage(
-                                'assets/images/background_person.png'),
-                            image: NetworkImage(userDetails.image!),
-                            fit: BoxFit.cover,
-                            imageErrorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey,
-                                height: 120,
-                                width:
-                                    120, // Use the same width and height for CircleAvatar
-                                alignment: Alignment.center,
-                                child: Text(
-                                  'Image Error',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                            },
-                            placeholderErrorBuilder:
-                                (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.white,
-                                height: 120,
-                                width:
-                                    120, // Use the same width and height for CircleAvatar
-                                alignment: Alignment.center,
-                              );
-                            },
-                          ),
-                        ),
-                      )
-                    : Container(
-                        height: 120,
-                        width: 120,
-                        child: LoadingRotating.square(
-                          borderColor: Colors.red,
-                          borderSize: 3.0,
-                          size: 60.0,
-                        ),
-                      )),
-            title: Padding(
-              padding: const EdgeInsets.only(top: 8, left: 8),
-              child: Text(
-                name ?? "no name",
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ),
-          ),
+          appBar: _appBar(),
           body: Center(
             child: SingleChildScrollView(
               child:
@@ -867,6 +807,48 @@ class _DescriptionPageState extends State<DescriptionPage> {
     );
   }
 
+  AppBar _appBar() {
+    return AppBar(
+      backgroundColor: Color(0xff771616),
+      title: Text(
+        name ?? '',
+        style: normalText,
+      ),
+      leading: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          final userDetails = userProvider.getUserByEmail(email);
+
+          return userDetails?.image == null || userDetails?.image == ""
+              ? const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage:
+                        AssetImage("assets/images/background_person.png"),
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage: NetworkImage("${userDetails?.image}"),
+                  ),
+                );
+        },
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            Icons.notifications_active,
+            size: 27.5,
+            color: white,
+          ),
+        )
+      ],
+    );
+  }
+
   Future<void> _selectStartDate(BuildContext context) async {
     NepaliDateTime? pickedDate = await showMaterialDatePicker(
       context: context,
@@ -927,7 +909,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
 
     if (pickedTime != null) {
       setState(() {
-        _selectedPickUpTime = pickedTime;
+        // _selectedPickUpTime = pickedTime;
         _pickUpTimeController.text = pickedTime.format(context);
 
         // Update provider with the selected pickup time
@@ -945,7 +927,7 @@ class _DescriptionPageState extends State<DescriptionPage> {
 
     if (pickedTime != null) {
       setState(() {
-        _selectedDropTime = pickedTime;
+        // _selectedDropTime = pickedTime;
         _dropTimeController.text = pickedTime.format(context);
 
         // Update provider with the selected drop time

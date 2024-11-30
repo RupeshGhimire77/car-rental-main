@@ -10,7 +10,8 @@ import 'package:flutter_application_1/service/stripe_service.dart';
 import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/utils/helper.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
-import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description.dart';
+// import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/edit_booking_details.dart';
 import 'package:loading_animations/loading_animations.dart';
@@ -81,90 +82,17 @@ class _HistoryState extends State<History> {
     );
   }
 
+  TextStyle normalText =
+      TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+  Color? white = Colors.white;
+
   Widget build(BuildContext context) {
     final userEmail = email ?? '';
     return Consumer<UserProvider>(builder: (context, userProvider, child) {
       final userDetails = userProvider.getUserByEmail(email);
       return Scaffold(
         backgroundColor: Color(0xff771616),
-        appBar: AppBar(
-          toolbarHeight: 60,
-          backgroundColor: Color(0xFF771616),
-          leading: Padding(
-              padding: const EdgeInsets.only(top: 8, left: 20),
-              child:
-                  userDetails?.image != null && userDetails!.image!.isNotEmpty
-                      ? CircleAvatar(
-                          radius: 60, // Adjust the radius as needed
-                          backgroundColor:
-                              Colors.grey, // Background color while loading
-                          child: ClipOval(
-                            child: FadeInImage(
-                              placeholder:
-                                  AssetImage('assets/images/placeholder.png'),
-                              image: NetworkImage(userDetails!.image!),
-                              fit: BoxFit.cover,
-                              imageErrorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey,
-                                  height: 120,
-                                  width:
-                                      120, // Use the same width and height for CircleAvatar
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Image Error',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                );
-                              },
-                              placeholderErrorBuilder:
-                                  (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.white,
-                                  height: 120,
-                                  width:
-                                      120, // Use the same width and height for CircleAvatar
-                                  alignment: Alignment.center,
-                                );
-                              },
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: 120,
-                          width: 120,
-                          child: LoadingRotating.square(
-                            borderColor: Colors.red,
-                            borderSize: 3.0,
-                            size: 60.0,
-                          ),
-                        )),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 8),
-            child: Text(
-              name ?? "",
-              // "",
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-          actions: [
-            // Padding(
-            //   padding: const EdgeInsets.only(right: 20, top: 8),
-            //   child: IconButton(
-            //       onPressed: () {},
-            //       icon: Icon(
-            //         Icons.notifications_active,
-            //         color: Colors.white,
-            //         size: 27.5,
-            //       )),
-            // )
-          ],
-        ),
+        appBar: _appBar(),
         body: Consumer3<CarProvider, BookCarProvider, RatingProvider>(builder:
             (context, carProvider, bookCarProvider, ratingProvider, child) {
           final userBookings = bookCarProvider.getUserBookings(userEmail);
@@ -434,7 +362,7 @@ class _HistoryState extends State<History> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DescriptionPage(
+                      builder: (context) => Description(
                         car: car,
                       ),
                     ));
@@ -565,6 +493,48 @@ class _HistoryState extends State<History> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      backgroundColor: Color(0xff771616),
+      title: Text(
+        name ?? '',
+        style: normalText,
+      ),
+      leading: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          final userDetails = userProvider.getUserByEmail(email);
+
+          return userDetails?.image == null || userDetails?.image == ""
+              ? const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage:
+                        AssetImage("assets/images/background_person.png"),
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage: NetworkImage("${userDetails?.image}"),
+                  ),
+                );
+        },
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            Icons.notifications_active,
+            size: 27.5,
+            color: white,
+          ),
+        )
       ],
     );
   }

@@ -19,6 +19,7 @@ import 'package:flutter_application_1/utils/status_util.dart';
 import 'package:flutter_application_1/utils/string_const.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/admin_bottom.navbar.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/admin/update_car_details.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:flutter_application_1/view/home/user%20login/login.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1256,7 +1257,8 @@ class AdminDashboardState extends State<AdminDashboard> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DescriptionPage(
+                      // builder: (context) => DescriptionPage(
+                      builder: (context) => Description(
                         car: car,
                       ),
                     ));

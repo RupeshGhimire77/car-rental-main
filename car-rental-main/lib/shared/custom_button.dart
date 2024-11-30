@@ -12,15 +12,14 @@ class CustomButton extends StatelessWidget {
       child: Center(
         child: Container(
             width: MediaQuery.of(context).size.width * .85,
-            child: Expanded(
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: Colors.red, width: 2))),
-                    onPressed: onPressed,
-                    child: child))),
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Colors.red, width: 2))),
+                onPressed: onPressed,
+                child: child)),
       ),
     );
   }

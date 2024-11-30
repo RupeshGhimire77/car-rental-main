@@ -5,7 +5,9 @@ import 'package:flutter_application_1/provider/brand_Provider.dart';
 import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/home.dart';
 import 'package:loading_animations/loading_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,253 +84,243 @@ class _BrandsSortState extends State<BrandsSort> {
     );
   }
 
+  TextStyle normalText =
+      TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+  Color? white = Colors.white;
+
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(builder: (context, userProvider, child) {
       final userDetails = userProvider.getUserByEmail(email);
       return Scaffold(
         backgroundColor: Color(0xff771616),
-        appBar: AppBar(
-          toolbarHeight: 60,
-          backgroundColor: Color(0xFF771616),
-          leading: Padding(
-              padding: const EdgeInsets.only(top: 8, left: 20),
-              child: userDetails?.image != null &&
-                      userDetails!.image!.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 60, // Adjust the radius as needed
-                      backgroundColor:
-                          Colors.grey, // Background color while loading
-                      child: ClipOval(
-                        child: FadeInImage(
-                          placeholder:
-                              AssetImage('assets/images/background_person.png'),
-                          image: NetworkImage(userDetails.image!),
-                          fit: BoxFit.cover,
-                          imageErrorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey,
-                              height: 120,
-                              width:
-                                  120, // Use the same width and height for CircleAvatar
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Image Error',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            );
-                          },
-                          placeholderErrorBuilder:
-                              (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.white,
-                              height: 120,
-                              width:
-                                  120, // Use the same width and height for CircleAvatar
-                              alignment: Alignment.center,
-                            );
-                          },
-                        ),
-                      ),
-                    )
-                  : Container(
-                      height: 120,
-                      width: 120,
-                      child: LoadingRotating.square(
-                        borderColor: Colors.red,
-                        borderSize: 3.0,
-                        size: 60.0,
-                      ),
-                    )),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 8, left: 8),
-            child: Text(
-              name ?? "",
-              // "",
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-          actions: [
-            // Padding(
-            //   padding: const EdgeInsets.only(right: 20, top: 8),
-            //   child: IconButton(
-            //       onPressed: () {},
-            //       icon: Icon(
-            //         Icons.notifications_active,
-            //         color: Colors.white,
-            //         size: 27.5,
-            //       )),
-            // )
-          ],
-        ),
-        body: Consumer2<CarProvider, RatingProvider>(
-          builder: (context, carProvider, ratingProvider, child) {
-            // Filter cars by the selected brand name
-            var filteredCars = carProvider.carList
-                .where((car) => car.brand == widget.brandName)
-                .toList();
-
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 5, left: 20),
-                  child: Text(
-                    "${widget.brandName} Cars", // Show the selected brand name
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 10),
-                    child: filteredCars.isEmpty
-                        ? Text(
-                            "There are no cars available for this Brand.",
-                            style: TextStyle(color: Colors.white, fontSize: 24),
-                          )
-                        : SizedBox(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            child: GridView.count(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 4,
-                              crossAxisSpacing: 1,
-                              scrollDirection: Axis.vertical,
-                              physics: ScrollPhysics(),
-                              children: List.generate(
-                                filteredCars
-                                    .length, // Use the filtered car list
-                                (index) {
-                                  ratingProvider.calculateAverageRating(
-                                      filteredCars[index].id!);
-                                  return SizedBox(
-                                    height: 300,
-                                    width: 300,
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                DescriptionPage(
-                                              car: filteredCars[
-                                                  index], // Pass the filtered car
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Card(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            filteredCars[index].image != null
-                                                ? ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    child: FadeInImage(
-                                                      placeholder: AssetImage(
-                                                          'assets/images/placeholder.png'),
-                                                      image: NetworkImage(
-                                                          filteredCars[index]
-                                                              .image!),
-                                                      height: 120,
-                                                      width: 180,
-                                                      fit: BoxFit.cover,
-                                                      imageErrorBuilder:
-                                                          (context, error,
-                                                              stackTrace) {
-                                                        return _buildImageErrorPlaceholder();
-                                                      },
-                                                    ),
-                                                  )
-                                                : _buildImageErrorPlaceholder(),
-                                            SizedBox(height: 5),
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 8.0),
-                                                  child: Icon(
-                                                    Icons.star,
-                                                    size: 16,
-                                                    color: Colors.yellow[800],
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 3.0),
-                                                  child: Text(
-                                                    "(${(ratingProvider.ratingList[filteredCars[index].id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[filteredCars[index].id]?.first ?? 0}",
-                                                    style:
-                                                        TextStyle(fontSize: 12),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8.0),
-                                              child: Text(
-                                                  filteredCars[index].model!),
-                                            ),
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 8.0),
-                                                  child: Text(
-                                                      "Rs. ${filteredCars[index].rentalPrice!}/day"),
-                                                ),
-                                                Spacer(),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 8.0),
-                                                  child: Container(
-                                                    width: 70,
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(5),
-                                                        color: Colors.orange
-                                                            .withOpacity(0.5)),
-                                                    // color: Colors.orange.withOpacity(0.5),
-                                                    child: Center(
-                                                        child: Text(
-                                                            "${filteredCars[index].availableStatus}")),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            );
-          },
+        appBar: _appBar(),
+        body: Column(
+          children: [_carList()],
         ),
       );
     });
+  }
+
+  Consumer _carList() {
+    final widthSize = MediaQuery.of(context).size.width;
+    final heightSize = MediaQuery.of(context).size.height;
+    return Consumer<CarProvider>(builder: (context, carProvider, child) {
+      var filteredCars = carProvider.carList
+          .where((car) => car.brand == widget.brandName)
+          .toList();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 20.0),
+            child: Center(
+              child: Text(
+                '${widget.brandName} Cars',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          // const SizedBox(
+          //   height: 15,
+          // ),
+          filteredCars.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      "There are no available cars for this brand.",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                )
+              : GridView.builder(
+                  padding: EdgeInsets.all(20),
+                  physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: filteredCars.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15),
+                  itemBuilder: (context, index) {
+                    final car = filteredCars[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Description(
+                                car: car,
+                              ),
+                            ));
+                      },
+                      child: Container(
+                        width: widthSize * .27,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            car.image == null || car.image!.isEmpty
+                                ? Container(
+                                    width: widthSize,
+                                    height: heightSize * .106,
+                                    decoration: const BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      color: Colors.white,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.asset(
+                                        "assets/images/sedan.png",
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    // width: widthSize,
+                                    // height: heightSize * .106,
+                                    decoration: const BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      color: Colors.white,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        car.image!,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 10, right: 10),
+                              child: Consumer<RatingProvider>(
+                                  builder: (context, ratingProvider, child) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.star,
+                                              size: 16,
+                                              color: Colors.yellow[900],
+                                            ),
+                                            Text(
+                                              // "(${(ratingProvider.ratingList[car.id]?.first ?? 0.0).toStringAsFixed(1)}/5) ${ratingProvider.totalNoOfRatings[car.id]?.first ?? 0}",
+                                              "${(car.averageRatings!).toStringAsFixed(2)}/5" +
+                                                  " (${car.totalNoOfRatings})",
+
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 14,
+                                                  color: Colors.black),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      car.model!,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 14,
+                                          color: Colors.black),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "Rs." + car.rentalPrice! + "/Day",
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              color: Colors.black),
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              color: Colors.orangeAccent),
+                                          child: Text(
+                                            car.availableStatus!,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 14,
+                                                color: Colors.black),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                )
+        ],
+      );
+    });
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      backgroundColor: Color(0xff771616),
+      title: Text(
+        name ?? '',
+        style: normalText,
+      ),
+      leading: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          final userDetails = userProvider.getUserByEmail(email);
+
+          return userDetails?.image == null || userDetails?.image == ""
+              ? const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage:
+                        AssetImage("assets/images/background_person.png"),
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: CircleAvatar(
+                    // radius: 25,
+                    backgroundImage: NetworkImage("${userDetails?.image}"),
+                  ),
+                );
+        },
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(
+            Icons.notifications_active,
+            size: 27.5,
+            color: Colors.white,
+          ),
+        )
+      ],
+    );
   }
 
   Widget _buildImageErrorPlaceholder() {

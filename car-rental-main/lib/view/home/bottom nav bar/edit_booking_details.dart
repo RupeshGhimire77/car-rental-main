@@ -9,6 +9,7 @@ import 'package:flutter_application_1/shared/custom_book_button.dart';
 import 'package:flutter_application_1/shared/custom_book_textfield.dart';
 import 'package:flutter_application_1/shared/custom_textform.dart';
 import 'package:flutter_application_1/utils/helper.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nepali_date_picker/nepali_date_picker.dart';
@@ -757,43 +758,40 @@ class _EditBookingDetailsState extends State<EditBookingDetails> {
       print("Error uploading image: $e");
     }
   }
+}
 
-  // Future<void> pickImage() async {
-  //   setState(() {
-  //     loader = true; // Show loader before upload
-  //   });
+class CustomLocationTextfield extends StatelessWidget {
+  final String? hintText;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final bool? enabled;
+  bool readOnly;
 
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  //   if (image == null) {
-  //     setState(() {
-  //       loader = false; // Hide loader if user cancels
-  //     });
-  //     return;
-  //   }
+  CustomLocationTextfield(
+      {this.hintText,
+      this.controller,
+      this.focusNode,
+      this.enabled,
+      this.readOnly = false});
 
-  //   file = File(image.path);
-  //   // Optionally upload the image to Firebase Storage
-  //   // await uploadImageToFirebase(file);
-
-  //   setState(() {
-  //     loader = false; // Hide loader after upload
-  //   });
-  // }
-
-  // // Optional: Function to upload the image to Firebase Storage
-  // Future<void> uploadImageToFirebase(File file) async {
-  //   try {
-  //     // Upload file to Firebase Storage
-  //     final storageRef = FirebaseStorage.instance
-  //         .ref()
-  //         .child('driving_licenses/${file.path.split('/').last}');
-  //     await storageRef.putFile(file);
-  //     downloadUrl = await storageRef.getDownloadURL();
-  //     // Update your provider or state with the downloadUrl if needed
-  //   } catch (e) {
-  //     // Handle any errors
-  //     print("Error uploading image: $e");
-  //   }
-  // }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 20,
+        right: 20,
+      ),
+      child: TextField(
+        style: TextStyle(color: Color(0xff7B776D)),
+        controller: controller,
+        focusNode: focusNode,
+        readOnly: readOnly,
+        enabled: enabled,
+        decoration: InputDecoration(
+          hintText: hintText,
+          suffixIcon: Icon(Icons.location_on),
+        ),
+      ),
+    );
+  }
 }

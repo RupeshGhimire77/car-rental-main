@@ -6,6 +6,7 @@ import 'package:flutter_application_1/provider/car_provider.dart';
 import 'package:flutter_application_1/provider/rating_provider.dart';
 import 'package:flutter_application_1/provider/user_provider.dart';
 import 'package:flutter_application_1/utils/status_util.dart';
+import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/description_page.dart';
 import 'package:flutter_application_1/view/home/bottom%20nav%20bar/brands_sort.dart';
 import 'package:loading_animations/loading_animations.dart';
@@ -101,50 +102,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // getCarData() async {
-  //   Future.delayed(
-  //     Duration.zero,
-  //     () async {
-  //       var provider = Provider.of<CarProvider>(context, listen: false);
-  //       await provider.getCar();
-
-  //       setState(() {
-  //         filteredCars = provider.carList;
-  //       });
-  //     },
-  //   );
-  // }
-
-  // getCarData() async {
-  //   Future.delayed(
-  //     Duration.zero,
-  //     () async {
-  //       final prefs = await SharedPreferences.getInstance();
-  //       final lastSearchedBrand = prefs.getString('lastSearchedBrand');
-
-  //       var provider = Provider.of<CarProvider>(context, listen: false);
-  //       await provider.getCar();
-
-  //       // Prioritize cars with the last-searched brand
-  //       List<Car> sortedCars = provider.carList;
-  //       if (lastSearchedBrand != null && lastSearchedBrand.isNotEmpty) {
-  //         sortedCars.sort((a, b) {
-  //           if (a.brand == lastSearchedBrand && b.brand != lastSearchedBrand) {
-  //             return -1;
-  //           } else if (a.brand != lastSearchedBrand &&
-  //               b.brand == lastSearchedBrand) {
-  //             return 1;
-  //           }
-  //           return 0;
-  //         });
-  //       }
-
-  //       setState(() {
-  //         filteredCars = sortedCars;
-  //       });
-  //     },
-  //   );
-  // }
   getCarData() async {
     Future.delayed(
       Duration.zero,
@@ -214,7 +171,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    User1? user;
+    // User1? user;
 
     // Get the current user
     // User? user1 = FirebaseAuth.instance.currentUser;
@@ -312,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 30),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.of(context).size.width * .6,
                               height: MediaQuery.of(context).size.width * .4,
                               child: ClipRect(
@@ -570,7 +527,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DescriptionPage(
+                builder: (context) => Description(
                   car: car,
                 ),
               ));

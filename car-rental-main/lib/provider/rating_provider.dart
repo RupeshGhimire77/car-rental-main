@@ -97,7 +97,7 @@ class RatingProvider extends ChangeNotifier {
     }
   }
 
-  void loadUserRating(String carId, String email) async {
+  Future<void> loadUserRating(String carId, String email) async {
     _isCarRatedStatus = StatusUtil.loading;
     notifyListeners();
 
@@ -117,6 +117,28 @@ class RatingProvider extends ChangeNotifier {
       setSaveIsCarRatedStatus(StatusUtil.none);
     }
   }
+
+  // Future<void> loadUserRating(String carId, String email) async {
+  //   try {
+  //     final doc = await FirebaseFirestore.instance
+  //         .collection('ratings')
+  //         .doc(carId)
+  //         .collection('userRatings')
+  //         .doc(email)
+  //         .get();
+
+  //     if (doc.exists) {
+  //       isRated = true;
+  //       ratingController.text = doc.data()?['rating']?.toString() ?? "0";
+  //     } else {
+  //       isRated = false;
+  //       ratingController.text = "0";
+  //     }
+  //   } catch (e) {
+  //     isRated = false;
+  //   }
+  //   notifyListeners();
+  // }
 
   Future<Map<String, dynamic>> getCarRatingDetails(String carId) async {
     try {
@@ -175,8 +197,27 @@ class RatingProvider extends ChangeNotifier {
 
         int noOfRatings = ratingSnapshot.docs.length;
         totalNoOfRatings[carId] = [noOfRatings];
+
+        // Update Firestore carsDb collection
+        await FirebaseFirestore.instance
+            .collection("carsDb")
+            .doc(carId)
+            .update({
+          "averageRatings": average,
+          "totalNoOfRatings": noOfRatings,
+        });
       } else {
         ratingList[carId] = [0.0]; // Default to 0 if no ratings found
+        totalNoOfRatings[carId] = [0];
+
+        // Update Firestore with defaults
+        await FirebaseFirestore.instance
+            .collection("carsDb")
+            .doc(carId)
+            .update({
+          "averageRatings": 0.0,
+          "totalNoOfRatings": 0,
+        });
       }
 
       notifyListeners();
